@@ -1,8 +1,6 @@
 package _128_bit_guy.redtech.common.part;
 
 import _128_bit_guy.redtech.common.init.ModItems;
-import _128_bit_guy.redtech.common.util.ShapeMath;
-import _128_bit_guy.redtech.common.util.VecMath;
 import alexiil.mc.lib.attributes.AttributeList;
 import alexiil.mc.lib.multipart.api.AbstractPart;
 import alexiil.mc.lib.multipart.api.MultipartHolder;
@@ -28,30 +26,7 @@ public class WirePart extends AbstractPart {
     public static final Map<Direction, Map<Direction, VoxelShape>> CONNECTION_SHAPES = new EnumMap<>(Direction.class);
 
     static {
-        double halfWidth = WIRE_WIDTH / 2;
-        {
-            VoxelShape down = VoxelShapes.cuboid(0.5 - halfWidth, 0, 0.5 - halfWidth, 0.5 + halfWidth, WIRE_HEIGHT, 0.5 + halfWidth);
-            for (Direction direction : Direction.values()) {
-                CENTER_SHAPES[direction.ordinal()] = ShapeMath.rotate(down, Direction.DOWN, direction);
-            }
-        }
-        {
-            for(Direction direction : Direction.values()) {
-                CONNECTION_SHAPES.put(direction, new EnumMap<>(Direction.class));
-            }
-            VoxelShape downWest = VoxelShapes.cuboid(0, 0, 0.5 - halfWidth, 0.5 - halfWidth, WIRE_HEIGHT, 0.5 + halfWidth);
-            for (Direction horizontalDirection : Direction.values()) {
-                if (horizontalDirection.getAxis() == Direction.Axis.Y) {
-                    continue;
-                }
-                VoxelShape down = ShapeMath.rotate(downWest, Direction.WEST, horizontalDirection, Direction.Axis.Y);
-                for(Direction mainDirection : Direction.values()) {
-                    Direction addDirection = VecMath.rotateDirection(horizontalDirection, Direction.DOWN, mainDirection);
-                    VoxelShape sh = ShapeMath.rotate(down, Direction.DOWN, mainDirection);
-                    CONNECTION_SHAPES.get(mainDirection).put(addDirection, sh);
-                }
-            }
-        }
+        WireShapeGen.createWireShapes(WIRE_WIDTH, WIRE_HEIGHT, CENTER_SHAPES, CONNECTION_SHAPES);
     }
 
     public final Direction direction;

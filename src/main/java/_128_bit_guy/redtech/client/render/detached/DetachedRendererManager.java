@@ -8,17 +8,12 @@ package _128_bit_guy.redtech.client.render.detached;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.lwjgl.opengl.GL11.*;
 
 /**
  * Dispatches "detached renderer elements" - rendering that does not require a specific block or entity in the world.
