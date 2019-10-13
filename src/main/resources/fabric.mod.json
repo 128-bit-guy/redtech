@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "redtech",
+  "version": "${version}",
+
+  "name": "Red tech",
+  "description": "Big extension to vanilla redstone and technology.",
+  "authors": [
+    "128_bit_guy"
+  ],
+
+  "license": "CC0-1.0",
+  "icon": "assets/redtech/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "_128_bit_guy.redtech.common.RedTech"
+    ],
+    "client": [
+      "_128_bit_guy.redtech.client.RedTechClient"
+    ]
+  },
+  "mixins": [
+    "mixins.redtech.common.json",
+    "mixins.redtech.client.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.4.0",
+    "fabric": ">=0.3.3",
+    "libmultipart": ">=0.2.0",
+    "libblockattributes_core": ">=0.5.0",
+    "libblockattributes_items": ">=0.5.0",
+    "libblockattributes_fluids": ">=0.5.0",
+    "libnetworkstack": ">=0.2.0"
+  }
+}

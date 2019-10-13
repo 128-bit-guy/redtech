@@ -1,0 +1,14 @@
+{
+  "item.redtech.cover.0": "%s Cover",
+  "item.redtech.cover.1": "%s Panel",
+  "item.redtech.cover.2": "%s Triple Cover",
+  "item.redtech.cover.3": "%s Slab",
+  "item.redtech.cover.4": "%s Anti Triple Cover",
+  "item.redtech.cover.5": "%s Anti Panel",
+  "item.redtech.cover.6": "%s Anti Cover",
+  "item.redtech.wood_saw": "Wooden Saw",
+  "item.redtech.stone_saw": "Stone Saw",
+  "item.redtech.iron_saw": "Iron Saw",
+  "item.redtech.diamond_saw": "Diamond Saw",
+  "itemGroup.redtech.microblocks": "Red Tech - Microblocks"
+}
