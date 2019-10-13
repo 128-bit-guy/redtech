@@ -11,9 +11,9 @@ public class RedTech implements ModInitializer {
     public static final String ID = "redtech";
     @Override
     public void onInitialize() {
+        ModTabs.init();
         ModParts.init();
         ModItems.init();
-        ModTabs.init();
         ModRecipeSerializers.init();
         ServerTickCallback.EVENT.register(new NetworkManager());
     }
