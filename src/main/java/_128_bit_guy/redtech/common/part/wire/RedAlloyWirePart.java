@@ -29,6 +29,7 @@ public class RedAlloyWirePart extends WirePartBase {
     private static final double WIRE_HEIGHT = 1d / 8d;
     private static final Map<Direction, Map<Direction, VoxelShape>> CONNECTION_SHAPES = new EnumMap<>(Direction.class);
     private static VoxelShape[] CENTER_SHAPES = new VoxelShape[6];
+    private static RANetwork network;
 
     static {
         WireShapeGen.createWireShapes(WIRE_WIDTH, WIRE_HEIGHT, CENTER_SHAPES, CONNECTION_SHAPES);
@@ -82,7 +83,7 @@ public class RedAlloyWirePart extends WirePartBase {
 
     @Override
     public void onConnectionsModified(boolean removed) {
-        
+
     }
 
     @Override
