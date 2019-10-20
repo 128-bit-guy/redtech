@@ -135,6 +135,7 @@ public class WirePart extends AbstractPart implements WSElementProvider {
                 }
             }
         }
+        r = r.simplify();
         return r;
     }
 

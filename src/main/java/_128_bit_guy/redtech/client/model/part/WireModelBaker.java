@@ -22,7 +22,7 @@ public class WireModelBaker implements PartModelBaker<WireModelKey> {
         for (Box box : WirePart.getWireShape(dir, key.connections).getBoundingBoxes()) {
             ModelUtils.emitBoxQuads(box, emitter, q -> {
                 q.spriteBake(0, sprite, MutableQuadView.BAKE_ROTATE_90 | MutableQuadView.BAKE_FLIP_V | MutableQuadView.BAKE_FLIP_U);
-                if (q.nominalFace() == dir || q.nominalFace().getAxis() != dir.getAxis()) {
+                if (q.nominalFace() == dir) {
                     q.cullFace(q.nominalFace());
                 }
                 return true;
