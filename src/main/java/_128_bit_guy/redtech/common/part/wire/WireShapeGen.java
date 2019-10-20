@@ -1,13 +1,16 @@
-package _128_bit_guy.redtech.common.part;
+package _128_bit_guy.redtech.common.part.wire;
 
 import _128_bit_guy.redtech.common.util.ShapeMath;
 import _128_bit_guy.redtech.common.util.VecMath;
+import net.minecraft.util.BooleanBiFunction;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class WireShapeGen {
     public static void createWireShapes(double wireWidth, double wireHeight, VoxelShape[] centerShapes, Map<Direction, Map<Direction, VoxelShape>> connectionShapes) {
@@ -35,5 +38,31 @@ public class WireShapeGen {
                 }
             }
         }
+    }
+
+    public static VoxelShape getWireCenterShape(Direction direction, VoxelShape[] centerShapes) {
+        return centerShapes[direction.ordinal()];
+    }
+
+    public static VoxelShape getWireShape(Direction mainDirection, Set<Direction> connections, VoxelShape[] centerShapes, Map<Direction, Map<Direction, VoxelShape>> connectionShapes) {
+        VoxelShape r = getWireCenterShape(mainDirection, centerShapes);
+        for (Direction direction : Direction.values()) {
+            if (direction.getAxis() != mainDirection.getAxis()) {
+                if (connections.contains(direction)) {
+                    VoxelShape s2 = connectionShapes.get(mainDirection).get(direction);
+                    r = VoxelShapes.combine(r, s2, BooleanBiFunction.OR);
+                }
+            }
+        }
+        r = r.simplify();
+        return r;
+    }
+
+    public static Set<Direction> mapToSet(Map<Direction, Boolean> connected) {
+        return connected.entrySet()
+                .stream()
+                .filter(Map.Entry::getValue)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
     }
 }

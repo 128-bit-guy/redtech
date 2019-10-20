@@ -2,7 +2,7 @@ package _128_bit_guy.redtech.common.item;
 
 import _128_bit_guy.redtech.common.init.ModParts;
 import _128_bit_guy.redtech.common.init.ModTabs;
-import _128_bit_guy.redtech.common.part.WirePart;
+import _128_bit_guy.redtech.common.part.wire.RedAlloyWirePart;
 import alexiil.mc.lib.multipart.api.MultipartContainer;
 import alexiil.mc.lib.multipart.api.MultipartUtil;
 import net.minecraft.item.Item;
@@ -25,7 +25,7 @@ public class WireItem extends Item {
         Direction direction = itemUsageContext_1.getSide();
         BlockPos pos = itemUsageContext_1.getBlockPos().offset(direction);
         World world = itemUsageContext_1.getWorld();
-        MultipartContainer.PartOffer offer = MultipartUtil.offerNewPart(world, pos, h -> new WirePart(ModParts.WIRE, h, direction.getOpposite()));
+        MultipartContainer.PartOffer offer = MultipartUtil.offerNewPart(world, pos, h -> new RedAlloyWirePart(ModParts.WIRE, h, direction.getOpposite()));
         if(offer != null) {
             offer.apply();
             itemUsageContext_1.getStack().decrement(1);

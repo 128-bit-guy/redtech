@@ -5,7 +5,6 @@ import _128_bit_guy.redtech.client.model.SimpleUnbakedModel;
 import _128_bit_guy.redtech.client.model.item.CoverModel;
 import _128_bit_guy.redtech.client.model.part.CoverModelBaker;
 import _128_bit_guy.redtech.client.model.part.WireModelBaker;
-import _128_bit_guy.redtech.common.part.WirePart;
 import _128_bit_guy.redtech.common.part.key.CoverModelKey;
 import _128_bit_guy.redtech.common.part.key.WireModelKey;
 import alexiil.mc.lib.multipart.api.render.MultipartRenderRegistry;

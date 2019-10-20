@@ -8,7 +8,7 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
 
 public class ModSprites {
-    public static Identifier WIRE = new Identifier(RedTech.ID, "part/wire");
+    public static Identifier RED_ALLOY_WIRE = new Identifier(RedTech.ID, "part/red_alloy_wire");
 
     public static void init() {
         ClientSpriteRegistryCallback
@@ -21,6 +21,6 @@ public class ModSprites {
     }
 
     private static void registerSprites(SpriteAtlasTexture texture, ClientSpriteRegistryCallback.Registry registry) {
-        registry.register(WIRE);
+        registry.register(RED_ALLOY_WIRE);
     }
 }

@@ -1,9 +1,8 @@
 package _128_bit_guy.redtech.client.model.part;
 
-import _128_bit_guy.redtech.client.init.ModModels;
 import _128_bit_guy.redtech.client.init.ModSprites;
 import _128_bit_guy.redtech.client.util.ModelUtils;
-import _128_bit_guy.redtech.common.part.WirePart;
+import _128_bit_guy.redtech.common.part.wire.RedAlloyWirePart;
 import _128_bit_guy.redtech.common.part.key.WireModelKey;
 import alexiil.mc.lib.multipart.api.render.PartModelBaker;
 import alexiil.mc.lib.multipart.api.render.PartRenderContext;
@@ -16,10 +15,10 @@ import net.minecraft.util.math.Direction;
 public class WireModelBaker implements PartModelBaker<WireModelKey> {
     @Override
     public void emitQuads(WireModelKey key, PartRenderContext ctx) {
-        Sprite sprite = ModSprites.getBlockSprite(ModSprites.WIRE);
+        Sprite sprite = ModSprites.getBlockSprite(ModSprites.RED_ALLOY_WIRE);
         QuadEmitter emitter = ctx.getEmitter();
         Direction dir = key.mainDirection;
-        for (Box box : WirePart.getWireShape(dir, key.connections).getBoundingBoxes()) {
+        for (Box box : RedAlloyWirePart.getWireShape(dir, key.connections).getBoundingBoxes()) {
             ModelUtils.emitBoxQuads(box, emitter, q -> {
                 q.spriteBake(0, sprite, MutableQuadView.BAKE_ROTATE_90 | MutableQuadView.BAKE_FLIP_V | MutableQuadView.BAKE_FLIP_U);
                 if (q.nominalFace() == dir) {

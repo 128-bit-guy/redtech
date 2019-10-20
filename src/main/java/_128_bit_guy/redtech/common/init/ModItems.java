@@ -22,7 +22,7 @@ public class ModItems {
         for(SawMaterial material : SawMaterial.values()) {
             SAWS.put(material, register(material.toString().toLowerCase() + "_saw", new SawItem(material)));
         }
-        WIRE = register("wire", new WireItem());
+        WIRE = register("red_alloy_wire", new WireItem());
     }
 
     private static  <T extends Item> T register(String id, T entry) {

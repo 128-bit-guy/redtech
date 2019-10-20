@@ -1,5 +1,6 @@
 package _128_bit_guy.redtech.common.attribute;
 
+import _128_bit_guy.redtech.common.part.wire.WirePointer;
 import alexiil.mc.lib.attributes.AttributeCombiner;
 import alexiil.mc.lib.attributes.Attributes;
 import alexiil.mc.lib.attributes.CombinableAttribute;
@@ -17,4 +18,9 @@ public interface WSElementProvider {
             );
 
     Optional<WSElement> get(Direction mainDirection, Direction searchDirection, WSElementType type, DyeColor color);
+
+    static Optional<WSElement> getFromPtr(WirePointer ptr, WSElementType type, DyeColor color) {
+        WSElementProvider provider = ATTRIBUTE.get(ptr.getWorld(), ptr.getBlockPos());
+        return provider.get(ptr.mainDirection, ptr.direction, type, color);
+    }
 }
