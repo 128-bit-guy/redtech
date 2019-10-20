@@ -1,13 +1,19 @@
 package _128_bit_guy.redtech.common.part;
 
 import _128_bit_guy.redtech.common.RedTech;
+import _128_bit_guy.redtech.common.attribute.WSElement;
+import _128_bit_guy.redtech.common.attribute.WSElementProvider;
+import _128_bit_guy.redtech.common.attribute.WSElementType;
 import _128_bit_guy.redtech.common.init.ModItems;
+import _128_bit_guy.redtech.common.part.key.WireModelKey;
 import alexiil.mc.lib.attributes.AttributeList;
 import alexiil.mc.lib.multipart.api.AbstractPart;
 import alexiil.mc.lib.multipart.api.MultipartEventBus;
 import alexiil.mc.lib.multipart.api.MultipartHolder;
 import alexiil.mc.lib.multipart.api.PartDefinition;
 import alexiil.mc.lib.multipart.api.event.NeighbourUpdateEvent;
+import alexiil.mc.lib.multipart.api.event.PartAddedEvent;
+import alexiil.mc.lib.multipart.api.event.PartRemovedEvent;
 import alexiil.mc.lib.multipart.api.event.PartTickEvent;
 import alexiil.mc.lib.multipart.api.render.PartModelKey;
 import alexiil.mc.lib.net.*;
@@ -16,14 +22,20 @@ import net.fabricmc.fabric.api.server.PlayerStream;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.BooleanBiFunction;
+import net.minecraft.util.DyeColor;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.World;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-public class WirePart extends AbstractPart {
+public class WirePart extends AbstractPart implements WSElementProvider {
     private static final double WIRE_WIDTH = 1d / 8d;
     private static final double WIRE_HEIGHT = 1d / 8d;
     private static final Map<Direction, Map<Direction, VoxelShape>> CONNECTION_SHAPES = new EnumMap<>(Direction.class);
@@ -39,7 +51,11 @@ public class WirePart extends AbstractPart {
 
     public final Direction direction;
     public final Map<Direction, Boolean> canConnect;
+    public final Map<Direction, Boolean> connected;
     private int ticksExisted = 0;
+    private boolean connectibleUpdateScheduled = false;
+    private boolean connectionUpdateScheduled = false;
+    private boolean connectionUpdateNNTScheduled = false;
 
     public WirePart(PartDefinition definition, MultipartHolder holder, CompoundTag nbt) {
         super(definition, holder);
@@ -48,12 +64,20 @@ public class WirePart extends AbstractPart {
         for (Direction direction : Direction.values()) {
             canConnect.put(direction, false);
         }
+        connected = new EnumMap<>(Direction.class);
+        for (Direction direction : Direction.values()) {
+            connected.put(direction, false);
+        }
     }
     public WirePart(PartDefinition definition, MultipartHolder holder, NetByteBuf buffer, IMsgReadCtx ctx) throws InvalidInputDataException {
         super(definition, holder);
         canConnect  = new EnumMap<>(Direction.class);
         for (Direction direction : Direction.values()) {
             canConnect.put(direction, false);
+        }
+        connected = new EnumMap<>(Direction.class);
+        for (Direction direction : Direction.values()) {
+            connected.put(direction, false);
         }
         direction = buffer.readEnumConstant(Direction.class);
         receiveUpdateConnections(buffer, ctx);
@@ -66,6 +90,10 @@ public class WirePart extends AbstractPart {
         for (Direction direction1 : Direction.values()) {
             canConnect.put(direction1, false);
         }
+        connected = new EnumMap<>(Direction.class);
+        for (Direction direction1 : Direction.values()) {
+            connected.put(direction1, false);
+        }
     }
 
     public static VoxelShape getWireCenterShape(Direction direction) {
@@ -76,17 +104,18 @@ public class WirePart extends AbstractPart {
         ctx.assertClientSide();
         for (Direction direction : Direction.values()) {
             if (direction.getAxis() != this.direction.getAxis()) {
-                canConnect.put(direction, buf.readBoolean());
+                connected.put(direction, buf.readBoolean());
             }
         }
         holder.getContainer().recalculateShape();
+        holder.getContainer().redrawIfChanged();
     }
 
     private void sendUpdateConnections(NetByteBuf buf, IMsgWriteCtx ctx) {
         ctx.assertServerSide();
         for (Direction direction : Direction.values()) {
             if (direction.getAxis() != this.direction.getAxis()) {
-                buf.writeBoolean(canConnect.get(direction));
+                buf.writeBoolean(connected.get(direction));
             }
         }
     }
@@ -96,13 +125,12 @@ public class WirePart extends AbstractPart {
         return getWireCenterShape(direction);
     }
 
-    @Override
-    public VoxelShape getCollisionShape() {
-        VoxelShape r = CENTER_SHAPES[direction.ordinal()];
+    public static VoxelShape getWireShape(Direction mainDirection, Set<Direction> connections) {
+        VoxelShape r = getWireCenterShape(mainDirection);
         for (Direction direction : Direction.values()) {
-            if (direction.getAxis() != this.direction.getAxis()) {
-                if (canConnect.get(direction)) {
-                    VoxelShape s2 = CONNECTION_SHAPES.get(this.direction).get(direction);
+            if (direction.getAxis() != mainDirection.getAxis()) {
+                if (connections.contains(direction)) {
+                    VoxelShape s2 = CONNECTION_SHAPES.get(mainDirection).get(direction);
                     r = VoxelShapes.combine(r, s2, BooleanBiFunction.OR);
                 }
             }
@@ -111,24 +139,27 @@ public class WirePart extends AbstractPart {
     }
 
     @Override
-    public PartModelKey getModelKey() {
-        return new PartModelKey() {
-            @Override
-            public boolean equals(Object obj) {
-                return false;
-            }
+    public VoxelShape getCollisionShape() {
+        return getWireShape(this.direction, mapToSet(connected));
+    }
 
-            @Override
-            public int hashCode() {
-                return 0;
-            }
-        };
+    private static Set<Direction> mapToSet(Map<Direction, Boolean> connected) {
+        return connected.entrySet()
+                        .stream()
+                        .filter(Map.Entry::getValue)
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toSet());
+    }
+
+    @Override
+    public PartModelKey getModelKey() {
+        return new WireModelKey(this.direction, mapToSet(connected));
     }
 
     @Override
     public void addAllAttributes(AttributeList<?> list) {
         super.addAllAttributes(list);
-
+        list.offer(this, getShape());
     }
 
     @Override
@@ -155,20 +186,39 @@ public class WirePart extends AbstractPart {
         super.onAdded(bus);
         bus.addListener(this, PartTickEvent.class, this::onTick);
         bus.addListener(this, NeighbourUpdateEvent.class, this::onNeighbourUpdate);
+        bus.addListener(this, PartAddedEvent.class, this::onPartAdded);
+        bus.addListener(this, PartRemovedEvent.class, this::onPartRemoved);
     }
 
     private void onTick(PartTickEvent event) {
         if(holder.getContainer().getMultipartWorld().isClient()) {
             return;
         }
-        if(ticksExisted == 1) {
+        if(connectionUpdateScheduled) {
+            refreshConnected();
+            connectionUpdateScheduled = false;
+        }
+        if(connectionUpdateNNTScheduled) {
+            connectionUpdateNNTScheduled = false;
+            connectionUpdateScheduled = true;
+        }
+        if(ticksExisted == 1 || connectibleUpdateScheduled) {
             refreshConnectible();
+            connectibleUpdateScheduled = false;
         }
         ++ticksExisted;
     }
 
     private void onNeighbourUpdate(NeighbourUpdateEvent event) {
+        connectionUpdateNNTScheduled = true;
+    }
+
+    private void onPartAdded(PartAddedEvent event) {
         refreshConnectible();
+    }
+
+    private void onPartRemoved(PartRemovedEvent event) {
+        connectibleUpdateScheduled = true;
     }
 
     private void refreshConnectible() {
@@ -184,8 +234,40 @@ public class WirePart extends AbstractPart {
             boolean b = VoxelShapes.matchesAnywhere(shape, shape1, BooleanBiFunction.AND);
             canConnect.put(direction, !b);
         }
+        connectionUpdateScheduled = true;
+    }
+
+    private void refreshConnected() {
+        for(Direction direction : Direction.values()) {
+            if(direction.getAxis() != this.direction.getAxis()) {
+                if(canConnect.get(direction)) {
+                    BlockPos pos2 = holder.getContainer().getMultipartPos().offset(direction);
+                    World world = holder.getContainer().getMultipartWorld();
+                    Optional<WSElement> optional = WSElementProvider.ATTRIBUTE.get(world, pos2).get(this.direction, direction, WSElementType.REDSTONE, null);
+                    connected.put(direction, optional.isPresent());
+                } else {
+                    connected.put(direction, false);
+                }
+            }
+        }
         PlayerStream
                 .watching(holder.getContainer().getMultipartBlockEntity())
                 .forEach(p -> UPDATE_CONNECTIONS.send(CoreMinecraftNetUtil.getConnection(p), this));
+        holder.getContainer().recalculateShape();
+    }
+
+    @Override
+    public Optional<WSElement> get(Direction mainDirection, Direction searchDirection, WSElementType type, DyeColor color) {
+        if(mainDirection != direction) {
+            return Optional.empty();
+        }
+        if(!canConnect.get(searchDirection.getOpposite())) {
+            return Optional.empty();
+        }
+        if(type != WSElementType.REDSTONE) {
+            return Optional.empty();
+        }
+        return Optional.of(new WSElement() {
+        });
     }
 }
