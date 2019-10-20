@@ -12,8 +12,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
-public class WireItem extends Item {
-    public WireItem() {
+public class RedAlloyWireItem extends Item {
+    public RedAlloyWireItem() {
         super(new Settings().group(ModTabs.WIRING));
     }
 
