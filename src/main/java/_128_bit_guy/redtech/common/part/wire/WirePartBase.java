@@ -1,9 +1,7 @@
 package _128_bit_guy.redtech.common.part.wire;
 
 import _128_bit_guy.redtech.common.RedTech;
-import _128_bit_guy.redtech.common.attribute.WSElement;
-import _128_bit_guy.redtech.common.attribute.WSElementProvider;
-import _128_bit_guy.redtech.common.attribute.WSElementType;
+import _128_bit_guy.redtech.common.attribute.wire.WSElementProvider;
 import alexiil.mc.lib.attributes.AttributeList;
 import alexiil.mc.lib.multipart.api.AbstractPart;
 import alexiil.mc.lib.multipart.api.MultipartEventBus;
@@ -18,7 +16,6 @@ import alexiil.mc.lib.net.impl.CoreMinecraftNetUtil;
 import net.fabricmc.fabric.api.server.PlayerStream;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.BooleanBiFunction;
-import net.minecraft.util.DyeColor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
@@ -27,7 +24,6 @@ import net.minecraft.world.World;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Optional;
 
 public abstract class WirePartBase extends AbstractPart implements WSElementProvider {
     private static ParentNetIdSingle<WirePartBase> NET_ID = AbstractPart.NET_ID.subType(WirePartBase.class, RedTech.ID + ":wire");

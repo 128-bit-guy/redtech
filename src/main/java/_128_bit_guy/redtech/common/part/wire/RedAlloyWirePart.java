@@ -1,19 +1,23 @@
 package _128_bit_guy.redtech.common.part.wire;
 
-import _128_bit_guy.redtech.common.attribute.WSElement;
-import _128_bit_guy.redtech.common.attribute.WSElementProvider;
-import _128_bit_guy.redtech.common.attribute.WSElementType;
+import _128_bit_guy.redtech.common.attribute.wire.WSElement;
+import _128_bit_guy.redtech.common.attribute.wire.WSElementProvider;
+import _128_bit_guy.redtech.common.attribute.wire.WSElementType;
 import _128_bit_guy.redtech.common.init.ModItems;
 import _128_bit_guy.redtech.common.part.key.WireModelKey;
 import alexiil.mc.lib.multipart.api.MultipartHolder;
 import alexiil.mc.lib.multipart.api.PartDefinition;
 import alexiil.mc.lib.multipart.api.render.PartModelKey;
 import alexiil.mc.lib.net.*;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.DyeColor;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.World;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -74,5 +78,17 @@ public class RedAlloyWirePart extends WirePartBase {
     @Override
     public boolean shouldConnect(WirePointer ptr) {
         return WSElementProvider.getFromPtr(ptr, WSElementType.REDSTONE, null).isPresent();
+    }
+
+    @Override
+    public boolean onActivate(PlayerEntity player, Hand hand, BlockHitResult hit) {
+        if(player.world.isClient()) {
+            return false;
+        }
+        if(player.getStackInHand(hand).getItem() != ModItems.MULTIMETER) {
+            return false;
+        }
+
+        return true;
     }
 }
