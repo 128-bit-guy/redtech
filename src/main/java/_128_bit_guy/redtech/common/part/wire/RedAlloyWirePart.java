@@ -76,8 +76,13 @@ public class RedAlloyWirePart extends WirePartBase {
     }
 
     @Override
-    public boolean shouldConnect(WirePointer ptr) {
-        return WSElementProvider.getFromPtr(ptr, WSElementType.REDSTONE, null).isPresent();
+    public Optional<WSElement> shouldConnect(WirePointer ptr) {
+        return WSElementProvider.getFromPtr(ptr, WSElementType.REDSTONE, null);
+    }
+
+    @Override
+    public void onConnectionsModified(boolean removed) {
+        
     }
 
     @Override

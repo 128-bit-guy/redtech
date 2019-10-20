@@ -1,6 +1,7 @@
 package _128_bit_guy.redtech.common.part.wire;
 
 import _128_bit_guy.redtech.common.RedTech;
+import _128_bit_guy.redtech.common.attribute.wire.WSElement;
 import _128_bit_guy.redtech.common.attribute.wire.WSElementProvider;
 import alexiil.mc.lib.attributes.AttributeList;
 import alexiil.mc.lib.multipart.api.AbstractPart;
@@ -24,6 +25,7 @@ import net.minecraft.world.World;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 
 public abstract class WirePartBase extends AbstractPart implements WSElementProvider {
     private static ParentNetIdSingle<WirePartBase> NET_ID = AbstractPart.NET_ID.subType(WirePartBase.class, RedTech.ID + ":wire");
@@ -37,6 +39,7 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
     public final Direction direction;
     public final Map<Direction, Boolean> canConnect;
     public final Map<Direction, Boolean> connected;
+    public final Map<Direction, WSElement> connections = new EnumMap<>(Direction.class);
     private final Map<Direction, Map<Direction, VoxelShape>> connectionShapes;
     private final VoxelShape[] centerShapes;
     protected int ticksExisted = 0;
@@ -181,20 +184,39 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
     }
 
     private void refreshConnected() {
+        boolean removed = false;
+        boolean added = false;
         for (Direction direction : Direction.values()) {
             if (direction.getAxis() != this.direction.getAxis()) {
                 if (canConnect.get(direction)) {
                     BlockPos pos2 = holder.getContainer().getMultipartPos().offset(direction);
                     World world = holder.getContainer().getMultipartWorld();
-//                    Optional<WSElement> optional = WSElementProvider.ATTRIBUTE.get(world, pos2).get(this.direction, direction, WSElementType.REDSTONE, null);
-//                    connected.put(direction, optional.isPresent());
                     WirePointer wp = new WirePointer(world, pos2, this.direction, direction);
-                    connected.put(direction, shouldConnect(wp));
+                    Optional<WSElement> element = shouldConnect(wp);
+                    connected.put(direction, element.isPresent());
+                    if(element.isPresent()) {
+                        if(!connections.containsKey(direction)) {
+                            connections.put(direction, element.get());
+                            added = true;
+                        }
+                    } else {
+                        if(connections.containsKey(direction)) {
+                            connections.remove(direction);
+                            removed = true;
+                        }
+                    }
 
                 } else {
                     connected.put(direction, false);
+                    if(connections.containsKey(direction)) {
+                        connections.remove(direction);
+                        removed = true;
+                    }
                 }
             }
+        }
+        if(added || removed) {
+            onConnectionsModified(removed);
         }
         PlayerStream
                 .watching(holder.getContainer().getMultipartBlockEntity())
@@ -202,7 +224,9 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
         holder.getContainer().recalculateShape();
     }
 
-    public abstract boolean shouldConnect(WirePointer ptr);
+    public abstract Optional<WSElement> shouldConnect(WirePointer ptr);
+
+    public abstract void onConnectionsModified(boolean removed);
 
     @Override
     public void addAllAttributes(AttributeList<?> list) {
