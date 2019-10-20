@@ -1,4 +1,4 @@
-package _128_bit_guy.redtech.common.attribute;
+package _128_bit_guy.redtech.common.attribute.wire;
 
 import _128_bit_guy.redtech.common.part.wire.WirePointer;
 import alexiil.mc.lib.attributes.AttributeCombiner;

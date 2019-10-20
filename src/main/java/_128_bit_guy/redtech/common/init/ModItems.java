@@ -1,10 +1,7 @@
 package _128_bit_guy.redtech.common.init;
 
 import _128_bit_guy.redtech.common.RedTech;
-import _128_bit_guy.redtech.common.item.CoverItem;
-import _128_bit_guy.redtech.common.item.SawItem;
-import _128_bit_guy.redtech.common.item.SawMaterial;
-import _128_bit_guy.redtech.common.item.RedAlloyWireItem;
+import _128_bit_guy.redtech.common.item.*;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -16,6 +13,7 @@ public class ModItems {
     public static CoverItem COVER;
     public static Map<SawMaterial, SawItem> SAWS = new EnumMap<>(SawMaterial.class);
     public static RedAlloyWireItem WIRE;
+    public static MultimeterItem MULTIMETER;
 
     public static void init() {
         COVER = register("cover", new CoverItem());
@@ -23,6 +21,7 @@ public class ModItems {
             SAWS.put(material, register(material.toString().toLowerCase() + "_saw", new SawItem(material)));
         }
         WIRE = register("red_alloy_wire", new RedAlloyWireItem());
+        MULTIMETER = register("multimeter", new MultimeterItem());
     }
 
     private static  <T extends Item> T register(String id, T entry) {

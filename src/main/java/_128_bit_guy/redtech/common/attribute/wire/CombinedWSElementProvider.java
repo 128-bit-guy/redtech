@@ -1,4 +1,4 @@
-package _128_bit_guy.redtech.common.attribute;
+package _128_bit_guy.redtech.common.attribute.wire;
 
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.math.Direction;
