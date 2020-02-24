@@ -42,16 +42,18 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
     public final Map<Direction, WSElement> connections = new EnumMap<>(Direction.class);
     private final Map<Direction, Map<Direction, VoxelShape>> connectionShapes;
     private final VoxelShape[] centerShapes;
+    private final VoxelShape[] notConnectedShapes;
     protected int ticksExisted = 0;
     protected boolean connectibleUpdateScheduled = false;
     protected boolean connectionUpdateScheduled = false;
     protected boolean connectionUpdateNNTScheduled = false;
 
-    public WirePartBase(PartDefinition definition, MultipartHolder holder, CompoundTag nbt, Map<Direction, Map<Direction, VoxelShape>> connectionShapes, VoxelShape[] centerShapes) {
+    public WirePartBase(PartDefinition definition, MultipartHolder holder, CompoundTag nbt, Map<Direction, Map<Direction, VoxelShape>> connectionShapes, VoxelShape[] centerShapes, VoxelShape[] notConnectedShapes) {
         super(definition, holder);
         direction = Direction.values()[nbt.getInt("dir")];
         this.connectionShapes = connectionShapes;
         this.centerShapes = centerShapes;
+        this.notConnectedShapes = notConnectedShapes;
         canConnect = new EnumMap<>(Direction.class);
         for (Direction direction : Direction.values()) {
             canConnect.put(direction, false);
@@ -62,10 +64,11 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
         }
     }
 
-    public WirePartBase(PartDefinition definition, MultipartHolder holder, NetByteBuf buffer, IMsgReadCtx ctx, Map<Direction, Map<Direction, VoxelShape>> connectionShapes, VoxelShape[] centerShapes) throws InvalidInputDataException {
+    public WirePartBase(PartDefinition definition, MultipartHolder holder, NetByteBuf buffer, IMsgReadCtx ctx, Map<Direction, Map<Direction, VoxelShape>> connectionShapes, VoxelShape[] centerShapes, VoxelShape[] notConnectedShapes) throws InvalidInputDataException {
         super(definition, holder);
         this.connectionShapes = connectionShapes;
         this.centerShapes = centerShapes;
+        this.notConnectedShapes = notConnectedShapes;
         canConnect = new EnumMap<>(Direction.class);
         for (Direction direction : Direction.values()) {
             canConnect.put(direction, false);
@@ -78,11 +81,12 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
         receiveUpdateConnections(buffer, ctx);
     }
 
-    public WirePartBase(PartDefinition definition, MultipartHolder holder, Direction direction, Map<Direction, Map<Direction, VoxelShape>> connectionShapes, VoxelShape[] centerShapes) {
+    public WirePartBase(PartDefinition definition, MultipartHolder holder, Direction direction, Map<Direction, Map<Direction, VoxelShape>> connectionShapes, VoxelShape[] centerShapes, VoxelShape[] notConnectedShapes) {
         super(definition, holder);
         this.direction = direction;
         this.connectionShapes = connectionShapes;
         this.centerShapes = centerShapes;
+        this.notConnectedShapes = notConnectedShapes;
         canConnect = new EnumMap<>(Direction.class);
         for (Direction direction1 : Direction.values()) {
             canConnect.put(direction1, false);
@@ -194,13 +198,13 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
                     WirePointer wp = new WirePointer(world, pos2, this.direction, direction);
                     Optional<WSElement> element = getConnectedElement(wp);
                     connected.put(direction, element.isPresent());
-                    if(element.isPresent()) {
-                        if(!connections.containsKey(direction)) {
+                    if (element.isPresent()) {
+                        if (!connections.containsKey(direction)) {
                             connections.put(direction, element.get());
                             added = true;
                         }
                     } else {
-                        if(connections.containsKey(direction)) {
+                        if (connections.containsKey(direction)) {
                             connections.remove(direction);
                             removed = true;
                         }
@@ -208,14 +212,14 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
 
                 } else {
                     connected.put(direction, false);
-                    if(connections.containsKey(direction)) {
+                    if (connections.containsKey(direction)) {
                         connections.remove(direction);
                         removed = true;
                     }
                 }
             }
         }
-        if(added || removed) {
+        if (added || removed) {
             onConnectionsModified(removed);
         }
         PlayerStream
@@ -241,6 +245,6 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
 
     @Override
     public VoxelShape getCollisionShape() {
-        return WireShapeGen.getWireShape(this.direction, WireShapeGen.mapToSet(connected), centerShapes, connectionShapes);
+        return WireShapeGen.getWireShape(this.direction, WireShapeGen.mapToSet(connected), centerShapes, connectionShapes, notConnectedShapes);
     }
 }

@@ -13,12 +13,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class WireShapeGen {
-    public static void createWireShapes(double wireWidth, double wireHeight, VoxelShape[] centerShapes, Map<Direction, Map<Direction, VoxelShape>> connectionShapes) {
+    public static void createWireShapes(double wireWidth, double wireHeight, VoxelShape[] centerShapes, Map<Direction, Map<Direction, VoxelShape>> connectionShapes, VoxelShape[] notConnectedShapes) {
         double halfWidth = wireWidth / 2;
         {
             VoxelShape down = VoxelShapes.cuboid(0.5 - halfWidth, 0, 0.5 - halfWidth, 0.5 + halfWidth, wireHeight, 0.5 + halfWidth);
             for (Direction direction : Direction.values()) {
                 centerShapes[direction.ordinal()] = ShapeMath.rotate(down, Direction.DOWN, direction);
+            }
+        }
+        {
+            VoxelShape down = VoxelShapes.cuboid(0.5 - 3 * halfWidth, 0, 0.5 - halfWidth, 0.5 + 3 * halfWidth, wireHeight, 0.5 + halfWidth);
+            for (Direction direction : Direction.values()) {
+                notConnectedShapes[direction.ordinal()] = ShapeMath.rotate(down, Direction.DOWN, direction);
             }
         }
         {
@@ -44,7 +50,10 @@ public class WireShapeGen {
         return centerShapes[direction.ordinal()];
     }
 
-    public static VoxelShape getWireShape(Direction mainDirection, Set<Direction> connections, VoxelShape[] centerShapes, Map<Direction, Map<Direction, VoxelShape>> connectionShapes) {
+    public static VoxelShape getWireShape(Direction mainDirection, Set<Direction> connections, VoxelShape[] centerShapes, Map<Direction, Map<Direction, VoxelShape>> connectionShapes, VoxelShape[] notConnectedShapes) {
+        if(connections.isEmpty()) {
+            return notConnectedShapes[mainDirection.ordinal()];
+        }
         VoxelShape r = getWireCenterShape(mainDirection, centerShapes);
         for (Direction direction : Direction.values()) {
             if (direction.getAxis() != mainDirection.getAxis()) {

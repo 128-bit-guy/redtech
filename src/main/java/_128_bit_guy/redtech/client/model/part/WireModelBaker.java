@@ -28,4 +28,5 @@ public class WireModelBaker implements PartModelBaker<WireModelKey> {
             });
         }
     }
+
 }

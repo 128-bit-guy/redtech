@@ -5,12 +5,10 @@ import _128_bit_guy.redtech.common.attribute.wire.WSElementProvider;
 import _128_bit_guy.redtech.common.attribute.wire.WSElementType;
 import _128_bit_guy.redtech.common.init.ModItems;
 import _128_bit_guy.redtech.common.part.key.WireModelKey;
-import _128_bit_guy.redtech.common.util.DirectedBlockPointer;
 import alexiil.mc.lib.multipart.api.MultipartHolder;
 import alexiil.mc.lib.multipart.api.PartDefinition;
 import alexiil.mc.lib.multipart.api.render.PartModelKey;
 import alexiil.mc.lib.net.*;
-import com.google.common.collect.Sets;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
@@ -29,27 +27,28 @@ public class RedAlloyWirePart extends WirePartBase {
     private static final double WIRE_HEIGHT = 1d / 8d;
     private static final Map<Direction, Map<Direction, VoxelShape>> CONNECTION_SHAPES = new EnumMap<>(Direction.class);
     private static VoxelShape[] CENTER_SHAPES = new VoxelShape[6];
+    private static VoxelShape[] NOT_CONNECTED_SHAPES = new VoxelShape[6];
     private int power;
 
     static {
-        WireShapeGen.createWireShapes(WIRE_WIDTH, WIRE_HEIGHT, CENTER_SHAPES, CONNECTION_SHAPES);
+        WireShapeGen.createWireShapes(WIRE_WIDTH, WIRE_HEIGHT, CENTER_SHAPES, CONNECTION_SHAPES, NOT_CONNECTED_SHAPES);
     }
 
     public RedAlloyWirePart(PartDefinition definition, MultipartHolder holder, CompoundTag nbt) {
-        super(definition, holder, nbt, CONNECTION_SHAPES, CENTER_SHAPES);
+        super(definition, holder, nbt, CONNECTION_SHAPES, CENTER_SHAPES, NOT_CONNECTED_SHAPES);
         power = nbt.getInt("strength");
     }
 
     public RedAlloyWirePart(PartDefinition definition, MultipartHolder holder, NetByteBuf buffer, IMsgReadCtx ctx) throws InvalidInputDataException {
-        super(definition, holder, buffer, ctx, CONNECTION_SHAPES, CENTER_SHAPES);
+        super(definition, holder, buffer, ctx, CONNECTION_SHAPES, CENTER_SHAPES, NOT_CONNECTED_SHAPES);
     }
 
     public RedAlloyWirePart(PartDefinition definition, MultipartHolder holder, Direction direction) {
-        super(definition, holder, direction, CONNECTION_SHAPES, CENTER_SHAPES);
+        super(definition, holder, direction, CONNECTION_SHAPES, CENTER_SHAPES, NOT_CONNECTED_SHAPES);
     }
 
     public static VoxelShape getWireShape(Direction mainDirection, Set<Direction> connections) {
-        return WireShapeGen.getWireShape(mainDirection, connections, CENTER_SHAPES, CONNECTION_SHAPES);
+        return WireShapeGen.getWireShape(mainDirection, connections, CENTER_SHAPES, CONNECTION_SHAPES, NOT_CONNECTED_SHAPES);
     }
 
     @Override
@@ -153,4 +152,6 @@ public class RedAlloyWirePart extends WirePartBase {
         tag.putInt("strength", power);
         return tag;
     }
+
+
 }
