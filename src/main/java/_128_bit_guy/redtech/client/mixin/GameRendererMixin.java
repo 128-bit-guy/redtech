@@ -12,18 +12,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
 
-    @Inject(
-        at = @At(value = "INVOKE", ordinal = 1, target = "Lcom/mojang/blaze3d/platform/GlStateManager;shadeModel(I)V"),
-        method = "renderCenter(FJ)V")
-    public void renderDetached(float f, long l, CallbackInfo ci) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        PlayerEntity player = mc.player;
-        if (player == null) return;
-        float partialTicks = mc.getTickDelta();
-        if (mc.isPaused()) {
-            partialTicks = 1;
-        }
-
-        DetachedRendererManager.INSTANCE.renderAfterCutout(player, partialTicks);
-    }
+//    @Inject(
+//        at = @At(value = "INVOKE", ordinal = 1, target = "Lcom/mojang/blaze3d/platform/GlStateManager;shadeModel(I)V"),
+//        method = "renderCenter(FJ)V")
+//    public void renderDetached(float f, long l, CallbackInfo ci) {
+//        MinecraftClient mc = MinecraftClient.getInstance();
+//        PlayerEntity player = mc.player;
+//        if (player == null) return;
+//        float partialTicks = mc.getTickDelta();
+//        if (mc.isPaused()) {
+//            partialTicks = 1;
+//        }
+//
+//        DetachedRendererManager.INSTANCE.renderAfterCutout(player, partialTicks);
+//    }
 }

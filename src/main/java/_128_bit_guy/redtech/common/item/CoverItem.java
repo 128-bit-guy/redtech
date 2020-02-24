@@ -17,11 +17,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Pair;
-import net.minecraft.util.TagHelper;
+//import net.minecraft.util.TagHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -39,7 +40,7 @@ public class CoverItem extends Item implements PreviewRendererProvider<CoverPrev
         ItemStack stack = new ItemStack(this);
         CompoundTag tag = stack.getOrCreateTag();
         tag.putInt("size", size);
-        tag.put("state", TagHelper.serializeBlockState(state));
+        tag.put("state", NbtHelper.fromBlockState(state));
         return stack;
     }
 
@@ -51,7 +52,7 @@ public class CoverItem extends Item implements PreviewRendererProvider<CoverPrev
         ItemStack stack = ctx.getStack();
         Vec3d hitPos = ctx.getHitPos();
         int size = stack.getOrCreateTag().getInt("size");
-        BlockState state = TagHelper.deserializeBlockState(stack.getOrCreateTag().getCompound("state"));
+        BlockState state = NbtHelper.toBlockState(stack.getOrCreateTag().getCompound("state"));
         if(world.isClient()) {
             return ActionResult.PASS;
         }
@@ -89,7 +90,7 @@ public class CoverItem extends Item implements PreviewRendererProvider<CoverPrev
         CompoundTag tag = itemStack_1.getOrCreateTag();
         String unlocalized = "item." + RedTech.ID + ".cover";
         unlocalized += "." + tag.getInt("size");
-        return new TranslatableText(unlocalized, TagHelper.deserializeBlockState(tag.getCompound("state")).getBlock().getName());
+        return new TranslatableText(unlocalized, NbtHelper.toBlockState(tag.getCompound("state")).getBlock().getName());
     }
 
     public static void addSubItems(List<ItemStack> list) {
@@ -115,7 +116,7 @@ public class CoverItem extends Item implements PreviewRendererProvider<CoverPrev
         ItemStack stack = ctx.getStack();
         Vec3d hitPos = ctx.getHitPos();
         int size = stack.getOrCreateTag().getInt("size");
-        BlockState state = TagHelper.deserializeBlockState(stack.getOrCreateTag().getCompound("state"));
+        BlockState state = NbtHelper.toBlockState(stack.getOrCreateTag().getCompound("state"));
         Pair<BlockPos, Direction> p = getCoverDirection(world, pos, side, hitPos, size);
         if(p == null) {
             return null;

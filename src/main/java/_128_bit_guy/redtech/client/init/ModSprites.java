@@ -17,7 +17,7 @@ public class ModSprites {
     }
 
     public static Sprite getBlockSprite(Identifier id) {
-        return MinecraftClient.getInstance().getSpriteAtlas().getSprite(id);
+        return MinecraftClient.getInstance().getSpriteAtlas(SpriteAtlasTexture.BLOCK_ATLAS_TEX).apply(id);
     }
 
     private static void registerSprites(SpriteAtlasTexture texture, ClientSpriteRegistryCallback.Registry registry) {

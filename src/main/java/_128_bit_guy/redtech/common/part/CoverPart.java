@@ -19,7 +19,8 @@ import alexiil.mc.lib.net.NetByteBuf;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.TagHelper;
+//import net.minecraft.util.NbtHelper;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 
@@ -56,7 +57,7 @@ public class CoverPart extends AbstractPart {
         super(definition, holder);
         size = nbt.getInt("size");
         direction = Direction.values()[nbt.getInt("dir")];
-        state = TagHelper.deserializeBlockState(nbt.getCompound("state"));
+        state = NbtHelper.toBlockState(nbt.getCompound("state"));
         postInit();
     }
 
@@ -64,7 +65,7 @@ public class CoverPart extends AbstractPart {
         super(definition, holder);
         size = buffer.readFixedBits(3);
         direction = buffer.readEnumConstant(Direction.class);
-        state = TagHelper.deserializeBlockState(buffer.readCompoundTag());
+        state = NbtHelper.toBlockState(buffer.readCompoundTag());
         postInit();
     }
 
@@ -133,7 +134,7 @@ public class CoverPart extends AbstractPart {
         super.writeCreationData(buffer, ctx);
         buffer.writeFixedBits(size, 3);
         buffer.writeEnumConstant(direction);
-        buffer.writeCompoundTag(TagHelper.serializeBlockState(state));
+        buffer.writeCompoundTag(NbtHelper.fromBlockState(state));
     }
 
     @Override
@@ -141,7 +142,7 @@ public class CoverPart extends AbstractPart {
         CompoundTag tag = new CompoundTag();
         tag.putInt("size", size);
         tag.putInt("dir", direction.ordinal());
-        tag.put("state", TagHelper.serializeBlockState(state));
+        tag.put("state", NbtHelper.fromBlockState(state));
         return tag;
     }
 

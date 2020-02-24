@@ -9,10 +9,11 @@ import net.minecraft.block.Blocks;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TagHelper;
+//import net.minecraft.util.TagHelper;
 import net.minecraft.world.World;
 
 public class CoverSplitRecipe extends SpecialCraftingRecipe {
@@ -46,7 +47,7 @@ public class CoverSplitRecipe extends SpecialCraftingRecipe {
                 if (var1.getInvStack(slot0).getItem() instanceof SawItem) {
                     if (var1.getInvStack(slot1).getItem() instanceof CoverItem) {
                         ItemStack inSlot1 = var1.getInvStack(slot1);
-                        BlockState state = TagHelper.deserializeBlockState(inSlot1.getOrCreateTag().getCompound("state"));
+                        BlockState state = NbtHelper.toBlockState(inSlot1.getOrCreateTag().getCompound("state"));
                         int size = inSlot1.getOrCreateTag().getInt("size");
                         ItemStack stack = ModItems.COVER.createStack((size + 1) / 2 - 1, state);
                         stack.setCount(2);

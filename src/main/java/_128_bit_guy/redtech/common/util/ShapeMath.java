@@ -33,8 +33,14 @@ public class ShapeMath {
         }
         VoxelShape result = VoxelShapes.empty();
         for (Box box : shape.getBoundingBoxes()) {
-            Vec3d min = VecMath.rotate(new Vec3d(box.minX, box.minY, box.minZ), from, to, rotationAxis);
-            Vec3d max = VecMath.rotate(new Vec3d(box.maxX, box.maxY, box.maxZ), from, to, rotationAxis);
+            float minX = (float) Math.min(box.x1, box.x2);
+            float minY = (float) Math.min(box.y1, box.y2);
+            float minZ = (float) Math.min(box.z1, box.z2);
+            float maxX = (float) Math.max(box.x1, box.x2);
+            float maxY = (float) Math.max(box.y1, box.y2);
+            float maxZ = (float) Math.max(box.z1, box.z2);
+            Vec3d min = VecMath.rotate(new Vec3d(minX, minY, minZ), from, to, rotationAxis);
+            Vec3d max = VecMath.rotate(new Vec3d(maxX, maxY, maxZ), from, to, rotationAxis);
             result = VoxelShapes.combine(result, vecCube(min, max), BooleanBiFunction.OR);
         }
         return result.simplify();

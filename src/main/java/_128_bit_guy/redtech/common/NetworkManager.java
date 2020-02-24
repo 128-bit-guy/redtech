@@ -5,7 +5,6 @@ import _128_bit_guy.redtech.client.render.preview.ItemPreviewRenderer;
 import _128_bit_guy.redtech.common.item.preview.PreviewRendererKey;
 import _128_bit_guy.redtech.common.item.preview.PreviewRendererProvider;
 import alexiil.mc.lib.net.*;
-import alexiil.mc.lib.net.impl.CoreMinecraftNetUtil;
 import alexiil.mc.lib.net.impl.McNetworkStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -37,12 +36,12 @@ public class NetworkManager implements ServerTickCallback {
         ctx.assertClientSide();
         ITEM_PREVIEW_KEY = null;
         ITEM_PREVIEW_RENDERER = null;
-        if(!buffer.readBoolean()) {
+        if (!buffer.readBoolean()) {
             return;
         }
         PlayerEntity player = ClientPlayerAccess.getPlayer();
         ItemStack stack = player.getMainHandStack();
-        if(!(stack.getItem() instanceof PreviewRendererProvider)) {
+        if (!(stack.getItem() instanceof PreviewRendererProvider)) {
             return;
         }
         PreviewRendererProvider it = (PreviewRendererProvider) stack.getItem();
@@ -82,8 +81,8 @@ public class NetworkManager implements ServerTickCallback {
 
     @Override
     public void tick(MinecraftServer server) {
-        for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()) {
-            ITEM_PREVIEW.send(CoreMinecraftNetUtil.getConnection(playerEntity), (b, c) -> writeItemPreview(b, c, playerEntity));
-        }
+//        for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()) {
+//            ITEM_PREVIEW.send(CoreMinecraftNetUtil.getConnection(playerEntity), (b, c) -> writeItemPreview(b, c, playerEntity));
+//        }
     }
 }

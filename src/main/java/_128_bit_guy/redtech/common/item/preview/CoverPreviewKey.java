@@ -5,7 +5,8 @@ import alexiil.mc.lib.net.IMsgWriteCtx;
 import alexiil.mc.lib.net.InvalidInputDataException;
 import alexiil.mc.lib.net.NetByteBuf;
 import net.minecraft.block.BlockState;
-import net.minecraft.util.TagHelper;
+//import net.minecraft.util.TagHelper;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
@@ -24,7 +25,7 @@ public class CoverPreviewKey implements PreviewRendererKey {
     public void receive(NetByteBuf buffer, IMsgReadCtx ctx) throws InvalidInputDataException {
         try {
             pos = buffer.readBlockPos();
-            state = TagHelper.deserializeBlockState(buffer.readCompoundTag());
+            state = NbtHelper.toBlockState(buffer.readCompoundTag());
             direction = buffer.readEnumConstant(Direction.class);
             size = buffer.readVarInt();
         } catch (NullPointerException ex) {
@@ -35,7 +36,7 @@ public class CoverPreviewKey implements PreviewRendererKey {
     @Override
     public void write(NetByteBuf buffer, IMsgWriteCtx ctx) {
         buffer.writeBlockPos(pos);
-        buffer.writeCompoundTag(TagHelper.serializeBlockState(state));
+        buffer.writeCompoundTag(NbtHelper.fromBlockState(state));
         buffer.writeEnumConstant(direction);
         buffer.writeVarInt(size);
     }

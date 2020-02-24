@@ -10,10 +10,11 @@ import net.minecraft.block.Blocks;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TagHelper;
+//import net.minecraft.util.TagHelper;
 import net.minecraft.world.World;
 
 public class CoverAdditionRecipe extends SpecialCraftingRecipe {
@@ -30,8 +31,8 @@ public class CoverAdditionRecipe extends SpecialCraftingRecipe {
                 if (var1.getInvStack(slot0).getItem() instanceof CoverItem && var1.getInvStack(slot1).getItem() instanceof CoverItem) {
                     ItemStack inSlot0 = var1.getInvStack(slot0);
                     ItemStack inSlot1 = var1.getInvStack(slot1);
-                    BlockState state0 = TagHelper.deserializeBlockState(inSlot0.getOrCreateTag().getCompound("state"));
-                    BlockState state1 = TagHelper.deserializeBlockState(inSlot1.getOrCreateTag().getCompound("state"));
+                    BlockState state0 = NbtHelper.toBlockState(inSlot0.getOrCreateTag().getCompound("state"));
+                    BlockState state1 = NbtHelper.toBlockState(inSlot1.getOrCreateTag().getCompound("state"));
                     if(state0 == state1) {
                         int size0 = inSlot0.getOrCreateTag().getInt("size");
                         int size1 = inSlot1.getOrCreateTag().getInt("size");
@@ -54,7 +55,7 @@ public class CoverAdditionRecipe extends SpecialCraftingRecipe {
                 if (var1.getInvStack(slot0).getItem() instanceof CoverItem && var1.getInvStack(slot1).getItem() instanceof CoverItem) {
                     ItemStack inSlot0 = var1.getInvStack(slot0);
                     ItemStack inSlot1 = var1.getInvStack(slot1);
-                    BlockState state = TagHelper.deserializeBlockState(inSlot0.getOrCreateTag().getCompound("state"));
+                    BlockState state = NbtHelper.toBlockState(inSlot0.getOrCreateTag().getCompound("state"));
                     int size0 = inSlot0.getOrCreateTag().getInt("size");
                     int size1 = inSlot1.getOrCreateTag().getInt("size");
                     if (size0 + size1 + 1 == 7) {

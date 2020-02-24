@@ -12,12 +12,12 @@ public class ModelUtils {
     public static final int WHITE = 0xFFFFFFFF;
 
     public static void emitBoxQuads(Box box, QuadEmitter emitter, RenderContext.QuadTransform transform) {
-        float minX = (float) box.minX;
-        float minY = (float) box.minY;
-        float minZ = (float) box.minZ;
-        float maxX = (float) box.maxX;
-        float maxY = (float) box.maxY;
-        float maxZ = (float) box.maxZ;
+        float minX = (float) Math.min(box.x1, box.x2);
+        float minY = (float) Math.min(box.y1, box.y2);
+        float minZ = (float) Math.min(box.z1, box.z2);
+        float maxX = (float) Math.max(box.x1, box.x2);
+        float maxY = (float) Math.max(box.y1, box.y2);
+        float maxZ = (float) Math.max(box.z1, box.z2);
         {
             emitter
                     .pos(0, minX, minY, minZ)
@@ -123,6 +123,6 @@ public class ModelUtils {
     }
 
     public static BakedModel getModel(BlockState state) {
-        return MinecraftClient.getInstance().getBakedModelManager().getBlockStateMaps().getModel(state);
+        return MinecraftClient.getInstance().getBakedModelManager().getBlockModels().getModel(state);
     }
 }
