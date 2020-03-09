@@ -102,10 +102,10 @@ public class RedAlloyWirePart extends WirePartBase {
                 RedAlloyWirePart.this.power = strength;
             }
 
-            @Override
-            public Map<Direction, WSElement> getConnections() {
-                return connections;
-            }
+//            @Override
+//            public Map<Direction, WSElement> getConnections() {
+//                return connections;
+//            }
 
             @Override
             public WirePointer getPtr() {
@@ -133,23 +133,23 @@ public class RedAlloyWirePart extends WirePartBase {
     }
 
     private void zeroingDfs(RAWSElement element, Set<WirePointer> was, Set<WirePointer> surrounding) {
-        if(was.contains(element.getPtr())) {
-            return;
-        }
-        was.add(element.getPtr());
-        int wasPower = element.getPower();
-        element.setPower(0);
-        for(WSElement element1 : element.getConnections().values()) {
-            if(element1 instanceof RAWSElement) {
-                RAWSElement element2 = (RAWSElement)element1;
-                if(element2.getPower() < wasPower && element2.getPower() != 0) {
-                    zeroingDfs(element2, was, surrounding);
-                } else {
-                    surrounding.add(element2.getPtr());
-                }
-            }
-        }
-        surrounding.remove(element.getPtr());
+//        if(was.contains(element.getPtr())) {
+//            return;
+//        }
+//        was.add(element.getPtr());
+//        int wasPower = element.getPower();
+//        element.setPower(0);
+//        for(WSElement element1 : element.getConnections().values()) {
+//            if(element1 instanceof RAWSElement) {
+//                RAWSElement element2 = (RAWSElement)element1;
+//                if(element2.getPower() < wasPower && element2.getPower() != 0) {
+//                    zeroingDfs(element2, was, surrounding);
+//                } else {
+//                    surrounding.add(element2.getPtr());
+//                }
+//            }
+//        }
+//        surrounding.remove(element.getPtr());
     }
 
     @Override
