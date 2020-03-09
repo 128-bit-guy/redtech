@@ -53,6 +53,7 @@ public class RedAlloyWirePart extends WirePartBase {
 
     public RedAlloyWirePart(PartDefinition definition, MultipartHolder holder, NetByteBuf buffer, IMsgReadCtx ctx) throws InvalidInputDataException {
         super(definition, holder, buffer, ctx, CONNECTION_SHAPES, CENTER_SHAPES, NOT_CONNECTED_SHAPES);
+        receiveUpdatePower(buffer, ctx);
     }
 
     public RedAlloyWirePart(PartDefinition definition, MultipartHolder holder, Direction direction) {
@@ -66,6 +67,12 @@ public class RedAlloyWirePart extends WirePartBase {
     @Override
     public PartModelKey getModelKey() {
         return new WireModelKey(this.direction, WireShapeGen.mapToSet(connected), power);
+    }
+
+    @Override
+    public void writeCreationData(NetByteBuf buffer, IMsgWriteCtx ctx) {
+        super.writeCreationData(buffer, ctx);
+        sendUpdatePower(buffer, ctx);
     }
 
     @Override

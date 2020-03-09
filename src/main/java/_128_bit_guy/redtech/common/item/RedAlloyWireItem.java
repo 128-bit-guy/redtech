@@ -31,6 +31,7 @@ public class RedAlloyWireItem extends Item {
         MultipartContainer.PartOffer offer = MultipartUtil.offerNewPart(world, pos, h -> new RedAlloyWirePart(ModParts.WIRE, h, direction.getOpposite()));
         if(offer != null) {
             offer.apply();
+            offer.getHolder().getPart().onPlacedBy(itemUsageContext_1.getPlayer(), itemUsageContext_1.getHand());
             itemUsageContext_1.getStack().decrement(1);
             return ActionResult.SUCCESS;
         }

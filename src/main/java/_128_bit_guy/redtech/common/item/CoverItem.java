@@ -61,6 +61,7 @@ public class CoverItem extends Item implements PreviewRendererProvider<CoverPrev
             MultipartContainer.PartOffer offer = MultipartUtil.offerNewPart(world, p.getLeft(), h -> new CoverPart(ModParts.COVER, h, size, p.getRight(), state));
             if(offer != null) {
                 offer.apply();
+                offer.getHolder().getPart().onPlacedBy(ctx.getPlayer(), ctx.getHand());
                 return ActionResult.SUCCESS;
             }
         }

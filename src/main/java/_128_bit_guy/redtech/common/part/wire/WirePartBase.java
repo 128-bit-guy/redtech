@@ -17,8 +17,10 @@ import alexiil.mc.lib.net.impl.CoreMinecraftNetUtil;
 import net.fabricmc.fabric.api.server.PlayerStream;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.BooleanBiFunction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
@@ -44,7 +46,7 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
     private final Map<Direction, Map<Direction, VoxelShape>> connectionShapes;
     private final VoxelShape[] centerShapes;
     private final VoxelShape[] notConnectedShapes;
-    protected int ticksExisted = 0;
+//    protected int ticksExisted = 0;
     protected boolean connectibleUpdateScheduled = false;
     protected boolean connectionSendScheduled = false;
 
@@ -160,11 +162,11 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
             sendUpdateConnections();
             connectionSendScheduled = false;
         }
-        if(ticksExisted == 0 || connectibleUpdateScheduled) {
+        if(/*ticksExisted == 0 || */connectibleUpdateScheduled) {
             refreshConnectible();
             connectibleUpdateScheduled = false;
         }
-        ++ticksExisted;
+//        ++ticksExisted;
     }
 
     private void onNeighbourUpdate(NeighbourUpdateEvent event) {
@@ -277,5 +279,11 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
     @Override
     public VoxelShape getCollisionShape() {
         return WireShapeGen.getWireShape(this.direction, WireShapeGen.mapToSet(connected), centerShapes, connectionShapes, notConnectedShapes);
+    }
+
+    @Override
+    public void onPlacedBy(PlayerEntity player, Hand hand) {
+        super.onPlacedBy(player, hand);
+        refreshConnectible();
     }
 }
