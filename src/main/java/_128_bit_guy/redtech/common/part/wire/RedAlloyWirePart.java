@@ -6,10 +6,8 @@ import _128_bit_guy.redtech.common.attribute.wire.WSElementProvider;
 import _128_bit_guy.redtech.common.attribute.wire.WSElementType;
 import _128_bit_guy.redtech.common.init.ModItems;
 import _128_bit_guy.redtech.common.part.key.WireModelKey;
-import alexiil.mc.lib.multipart.api.AbstractPart;
 import alexiil.mc.lib.multipart.api.MultipartHolder;
 import alexiil.mc.lib.multipart.api.PartDefinition;
-import alexiil.mc.lib.multipart.api.event.NeighbourUpdateEvent;
 import alexiil.mc.lib.multipart.api.event.PartTickEvent;
 import alexiil.mc.lib.multipart.api.render.PartModelKey;
 import alexiil.mc.lib.net.*;
@@ -94,18 +92,33 @@ public class RedAlloyWirePart extends WirePartBase {
         return Optional.of(new RAWSElement() {
             @Override
             public int getPower() {
-                return power;
+                RedAlloyWirePart wp = RedAlloyWirePart.this;
+                return wp.power;
+            }
+
+            @Override
+            public int getIncomingRedstonePower() {
+                return (holder.getContainer().getMultipartWorld().getReceivedRedstonePower(holder.getContainer().getMultipartPos()) * 17);
             }
 
             @Override
             public void setPower(int strength) {
-                RedAlloyWirePart.this.power = strength;
+                if(RedAlloyWirePart.this.power != strength) {
+                    RedAlloyWirePart.this.power = strength;
+                    powerSendScheduled = true;
+                }
             }
 
-//            @Override
-//            public Map<Direction, WSElement> getConnections() {
-//                return connections;
-//            }
+            @Override
+            public Map<Direction, WSElement> getConnections() {
+                EnumMap<Direction, WSElement> result = new EnumMap<>(Direction.class);
+                for(Direction direction : Direction.values()) {
+                    if(connected.get(direction)) {
+                        result.put(direction, getConnectedWire(direction).get());
+                    }
+                }
+                return result;
+            }
 
             @Override
             public WirePointer getPtr() {
@@ -117,7 +130,9 @@ public class RedAlloyWirePart extends WirePartBase {
     @Override
     protected void updatePower() {
         int oldPower = power;
-        power = (holder.getContainer().getMultipartWorld().getReceivedRedstonePower(holder.getContainer().getMultipartPos()) * 17);
+        int newPower = (holder.getContainer().getMultipartWorld().getReceivedRedstonePower(holder.getContainer().getMultipartPos()) * 17);
+        RAWSElement el = (RAWSElement)get(direction, null, WSElementType.REDSTONE, null).get();
+        WirePowerPropagator.propagate(el, oldPower > newPower);
         if(oldPower != power) {
             powerSendScheduled = true;
         }
@@ -132,34 +147,14 @@ public class RedAlloyWirePart extends WirePartBase {
         return WSElementProvider.getFromPtr(ptr, WSElementType.REDSTONE, null);
     }
 
-    private void zeroingDfs(RAWSElement element, Set<WirePointer> was, Set<WirePointer> surrounding) {
-//        if(was.contains(element.getPtr())) {
-//            return;
-//        }
-//        was.add(element.getPtr());
-//        int wasPower = element.getPower();
-//        element.setPower(0);
-//        for(WSElement element1 : element.getConnections().values()) {
-//            if(element1 instanceof RAWSElement) {
-//                RAWSElement element2 = (RAWSElement)element1;
-//                if(element2.getPower() < wasPower && element2.getPower() != 0) {
-//                    zeroingDfs(element2, was, surrounding);
-//                } else {
-//                    surrounding.add(element2.getPtr());
-//                }
-//            }
-//        }
-//        surrounding.remove(element.getPtr());
-    }
-
     @Override
     public void onConnectionsModified(boolean removed) {
         RAWSElement el = (RAWSElement)get(direction, null, WSElementType.REDSTONE, null).get();
-        HashSet<WirePointer> fillStartPoints = new HashSet<>();
-        if(removed) {
-            zeroingDfs(el, new HashSet<>(), fillStartPoints);
-        }
-
+//        HashSet<WirePointer> fillStartPoints = new HashSet<>();
+//        if(removed) {
+//            zeroingDfs(el, new HashSet<>(), fillStartPoints);
+//        }
+        WirePowerPropagator.propagate(el, removed);
     }
 
     @Override

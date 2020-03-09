@@ -219,16 +219,20 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
         }
     }
 
+    protected Optional<WSElement> getConnectedWire(Direction direction) {
+        BlockPos pos2 = holder.getContainer().getMultipartPos().offset(direction);
+        World world = holder.getContainer().getMultipartWorld();
+        WirePointer wp = new WirePointer(world, pos2, this.direction, direction);
+        return getConnectedElement(wp);
+    }
+
     private void refreshConnected() {
         boolean removed = false;
         boolean added = false;
         for (Direction direction : Direction.values()) {
             if (direction.getAxis() != this.direction.getAxis()) {
                 if (canConnect.get(direction)) {
-                    BlockPos pos2 = holder.getContainer().getMultipartPos().offset(direction);
-                    World world = holder.getContainer().getMultipartWorld();
-                    WirePointer wp = new WirePointer(world, pos2, this.direction, direction);
-                    Optional<WSElement> element = getConnectedElement(wp);
+                    Optional<WSElement> element = getConnectedWire(direction);
                     added |= !connected.get(direction) && element.isPresent();
                     removed |= connected.get(direction) && !element.isPresent();
                     connected.put(direction, element.isPresent());

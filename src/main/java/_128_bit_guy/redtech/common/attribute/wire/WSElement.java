@@ -6,7 +6,7 @@ import net.minecraft.util.math.Direction;
 import java.util.Map;
 
 public interface WSElement {
-//    Map<Direction, WSElement> getConnections();
+    Map<Direction, WSElement> getConnections();
 
     WirePointer getPtr();
 }
