@@ -30,12 +30,11 @@ import java.util.Map;
 import java.util.Optional;
 
 public abstract class WirePartBase extends AbstractPart implements WSElementProvider {
-    private static ParentNetIdSingle<WirePartBase> NET_ID = AbstractPart.NET_ID.subType(WirePartBase.class, RedTech.ID + ":wire");
+    public static ParentNetIdSingle<WirePartBase> NET_ID = AbstractPart.NET_ID.subType(WirePartBase.class, RedTech.ID + ":wire");
     private static NetIdDataK<WirePartBase> UPDATE_CONNECTIONS = NET_ID.idData("update_connections");
 
     static {
         UPDATE_CONNECTIONS.setReadWrite(WirePartBase::receiveUpdateConnections, WirePartBase::sendUpdateConnections);
-        UPDATE_CONNECTIONS.setBuffered(false);
     }
 
     public final Direction direction;
@@ -153,7 +152,7 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
         bus.addListener(this, PartRemovedEvent.class, this::onPartRemoved);
     }
 
-    private void onTick(PartTickEvent event) {
+    protected void onTick(PartTickEvent event) {
         if (holder.getContainer().getMultipartWorld().isClient()) {
             return;
         }
@@ -168,11 +167,20 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
         ++ticksExisted;
     }
 
-    protected void onNeighbourUpdate(NeighbourUpdateEvent event) {
+    private void onNeighbourUpdate(NeighbourUpdateEvent event) {
         if(!canExist()) {
             holder.remove();
         }
+        updateEverything();
+    }
+
+    protected void updatePower() {
+
+    }
+
+    protected void updateEverything() {
         refreshConnected();
+        updatePower();
     }
 
     private void onPartAdded(PartAddedEvent event) {
@@ -198,7 +206,7 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
             x |= b != canConnect.get(direction);
             canConnect.put(direction, b);
         }
-        refreshConnected();
+        updateEverything();
         if(x) {
             BlockPos pos = holder.getContainer().getMultipartPos();
             World w = holder.getContainer().getMultipartWorld();

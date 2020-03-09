@@ -12,9 +12,22 @@ import alexiil.mc.lib.multipart.api.render.PartStaticModelRegisterEvent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
+import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
 
 @Environment(EnvType.CLIENT)
 public class ModModels {
+    public static RenderMaterial SOLID_NORMAL = RendererAccess.INSTANCE.getRenderer().materialFinder()
+            .blendMode(0, BlendMode.SOLID)
+            .find();
+    public static RenderMaterial SOLID_EMISSIVE = RendererAccess.INSTANCE.getRenderer().materialFinder()
+            .blendMode(0, BlendMode.SOLID)
+            .emissive(0, true)
+            .disableAo(0, true)
+            .disableDiffuse(0, true)
+            .find();
+
     public static void init() {
         ModelLoadingRegistry.INSTANCE.registerVariantProvider(ModModelVariantProvider::new);
         PartStaticModelRegisterEvent.EVENT.register((renderer -> {

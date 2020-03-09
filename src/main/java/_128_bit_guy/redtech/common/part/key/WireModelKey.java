@@ -29,11 +29,11 @@ public class WireModelKey extends PartModelKey {
         if (o == null || getClass() != o.getClass()) return false;
         WireModelKey that = (WireModelKey) o;
         return mainDirection == that.mainDirection &&
-                connections.equals(that.connections);
+                connections.equals(that.connections) && power == that.power;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mainDirection, connections);
+        return Objects.hash(mainDirection, connections, power);
     }
 }

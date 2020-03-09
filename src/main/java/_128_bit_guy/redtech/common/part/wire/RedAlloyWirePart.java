@@ -1,13 +1,16 @@
 package _128_bit_guy.redtech.common.part.wire;
 
+import _128_bit_guy.redtech.common.RedTech;
 import _128_bit_guy.redtech.common.attribute.wire.WSElement;
 import _128_bit_guy.redtech.common.attribute.wire.WSElementProvider;
 import _128_bit_guy.redtech.common.attribute.wire.WSElementType;
 import _128_bit_guy.redtech.common.init.ModItems;
 import _128_bit_guy.redtech.common.part.key.WireModelKey;
+import alexiil.mc.lib.multipart.api.AbstractPart;
 import alexiil.mc.lib.multipart.api.MultipartHolder;
 import alexiil.mc.lib.multipart.api.PartDefinition;
 import alexiil.mc.lib.multipart.api.event.NeighbourUpdateEvent;
+import alexiil.mc.lib.multipart.api.event.PartTickEvent;
 import alexiil.mc.lib.multipart.api.render.PartModelKey;
 import alexiil.mc.lib.net.*;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,12 +27,20 @@ import net.minecraft.util.shape.VoxelShape;
 import java.util.*;
 
 public class RedAlloyWirePart extends WirePartBase {
+    public static ParentNetIdSingle<RedAlloyWirePart> NET_ID = WirePartBase.NET_ID.subType(RedAlloyWirePart.class, RedTech.ID + ":red_alloy_wire");
+    private static NetIdDataK<RedAlloyWirePart> UPDATE_POWER = NET_ID.idData("update_power");
+
+    static {
+        UPDATE_POWER.setReadWrite(RedAlloyWirePart::receiveUpdatePower, RedAlloyWirePart::sendUpdatePower);
+    }
+
     private static final double WIRE_WIDTH = 1d / 8d;
     private static final double WIRE_HEIGHT = 1d / 8d;
     private static final Map<Direction, Map<Direction, VoxelShape>> CONNECTION_SHAPES = new EnumMap<>(Direction.class);
     private static VoxelShape[] CENTER_SHAPES = new VoxelShape[6];
     private static VoxelShape[] NOT_CONNECTED_SHAPES = new VoxelShape[6];
     private int power;
+    private boolean powerSendScheduled = false;
 
     static {
         WireShapeGen.createWireShapes(WIRE_WIDTH, WIRE_HEIGHT, CENTER_SHAPES, CONNECTION_SHAPES, NOT_CONNECTED_SHAPES);
@@ -97,9 +108,12 @@ public class RedAlloyWirePart extends WirePartBase {
     }
 
     @Override
-    protected void onNeighbourUpdate(NeighbourUpdateEvent event) {
-        super.onNeighbourUpdate(event);
+    protected void updatePower() {
+        int oldPower = power;
         power = (holder.getContainer().getMultipartWorld().getReceivedRedstonePower(holder.getContainer().getMultipartPos()) * 17);
+        if(oldPower != power) {
+            powerSendScheduled = true;
+        }
     }
 
     private WirePointer getPtr() {
@@ -160,5 +174,25 @@ public class RedAlloyWirePart extends WirePartBase {
         return tag;
     }
 
+    @Override
+    protected void onTick(PartTickEvent event) {
+        super.onTick(event);
+        if(powerSendScheduled) {
+            sendNetworkUpdate(this, UPDATE_POWER);
+            powerSendScheduled = false;
+        }
+    }
 
+
+    private void receiveUpdatePower(NetByteBuf buf, IMsgReadCtx ctx) throws InvalidInputDataException {
+        ctx.assertClientSide();
+        power = buf.readVarInt();
+//        holder.getContainer().recalculateShape();
+        holder.getContainer().redrawIfChanged();
+    }
+
+    private void sendUpdatePower(NetByteBuf buf, IMsgWriteCtx ctx) {
+        ctx.assertServerSide();
+        buf.writeVarInt(power);
+    }
 }

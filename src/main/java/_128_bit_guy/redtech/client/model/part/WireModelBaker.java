@@ -1,5 +1,6 @@
 package _128_bit_guy.redtech.client.model.part;
 
+import _128_bit_guy.redtech.client.init.ModModels;
 import _128_bit_guy.redtech.client.init.ModSprites;
 import _128_bit_guy.redtech.client.util.ModelUtils;
 import _128_bit_guy.redtech.common.part.wire.RedAlloyWirePart;
@@ -24,9 +25,14 @@ public class WireModelBaker implements PartModelBaker<WireModelKey> {
                 if (q.nominalFace() == dir) {
                     q.cullFace(q.nominalFace());
                 }
-                int allColor = key.power;
+                int allColor = key.power << (4 * 4);
                 allColor |= 0xFF000000;
                 q.spriteColor(0, allColor, allColor, allColor, allColor);
+                if(key.power >= 10) {
+                    q.material(ModModels.SOLID_EMISSIVE);
+                } else {
+                    q.material(ModModels.SOLID_NORMAL);
+                }
                 return true;
             });
         }

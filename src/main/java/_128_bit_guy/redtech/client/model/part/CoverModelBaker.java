@@ -1,5 +1,6 @@
 package _128_bit_guy.redtech.client.model.part;
 
+import _128_bit_guy.redtech.client.init.ModModels;
 import _128_bit_guy.redtech.common.part.key.CoverModelKey;
 import _128_bit_guy.redtech.client.util.ModelUtils;
 import _128_bit_guy.redtech.common.part.CoverPart;
@@ -22,7 +23,6 @@ public class CoverModelBaker implements PartModelBaker<CoverModelKey> {
         Direction dir = key.direction;
         Sprite sprite = ModelUtils.getModel(key.state).getSprite();
         for(Box box : CoverPart.getCoverShape(key.size, key.direction).getBoundingBoxes()) {
-//            Box box = CoverPart.getCoverShape(key.size, key.direction).getBoundingBox();
             ModelUtils.emitBoxQuads(box, emitter, q -> {
                 if (key.culled.contains(q.nominalFace())) {
                     return false;
@@ -31,6 +31,7 @@ public class CoverModelBaker implements PartModelBaker<CoverModelKey> {
                 if (q.nominalFace() == dir || q.nominalFace().getAxis() != dir.getAxis()) {
                     q.cullFace(q.nominalFace());
                 }
+                q.material(ModModels.SOLID_NORMAL);
                 return true;
             });
         }
