@@ -43,7 +43,6 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
     public final Direction direction;
     public final Map<Direction, Boolean> canConnect;
     public final Map<Direction, Boolean> connected;
-//    public final Map<Direction, WSElement> connections = new EnumMap<>(Direction.class);
     private final Map<Direction, Map<Direction, VoxelShape>> connectionShapes;
     private final VoxelShape[] centerShapes;
     private final VoxelShape[] notConnectedShapes;
@@ -211,19 +210,28 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
             x |= b != canConnect.get(direction);
             canConnect.put(direction, b);
         }
-        updateEverything();
         if(x) {
             BlockPos pos = holder.getContainer().getMultipartPos();
             World w = holder.getContainer().getMultipartWorld();
             w.updateNeighbors(pos, w.getBlockState(pos).getBlock());
+            w.updateNeighbors(pos.up(), w.getBlockState(pos.up()).getBlock());
         }
+        updateEverything();
     }
 
     protected Optional<WSElement> getConnectedWire(Direction direction) {
         BlockPos pos2 = holder.getContainer().getMultipartPos().offset(direction);
         World world = holder.getContainer().getMultipartWorld();
         WirePointer wp = new WirePointer(world, pos2, this.direction, direction);
-        return getConnectedElement(wp);
+        Optional<WSElement> element = getConnectedElement(wp);
+        if(element.isPresent()) {
+            return element;
+        }
+        pos2 = holder.getContainer().getMultipartPos();
+        world = holder.getContainer().getMultipartWorld();
+        wp = new WirePointer(world, pos2, direction, this.direction.getOpposite());
+        element = getConnectedElement(wp);
+        return element;
     }
 
     private void refreshConnected() {
@@ -236,25 +244,9 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
                     added |= !connected.get(direction) && element.isPresent();
                     removed |= connected.get(direction) && !element.isPresent();
                     connected.put(direction, element.isPresent());
-//                    if (element.isPresent()) {
-//                        if (!connections.containsKey(direction)) {
-//                            connections.put(direction, element.get());
-//                            added = true;
-//                        }
-//                    } else {
-//                        if (connections.containsKey(direction)) {
-//                            connections.remove(direction);
-//                            removed = true;
-//                        }
-//                    }
-
                 } else {
                     removed |= !connected.get(direction);
                     connected.put(direction, false);
-//                    if (connections.containsKey(direction)) {
-//                        connections.remove(direction);
-//                        removed = true;
-//                    }
                 }
             }
         }
