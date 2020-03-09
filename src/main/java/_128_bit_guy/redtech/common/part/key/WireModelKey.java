@@ -9,10 +9,18 @@ import java.util.Set;
 public class WireModelKey extends PartModelKey {
     public final Direction mainDirection;
     public final Set<Direction> connections;
+    public final int power;
 
     public WireModelKey(Direction mainDirection, Set<Direction> connections) {
         this.mainDirection = mainDirection;
         this.connections = connections;
+        this.power = 0;
+    }
+
+    public WireModelKey(Direction mainDirection, Set<Direction> connections, int power) {
+        this.mainDirection = mainDirection;
+        this.connections = connections;
+        this.power = power;
     }
 
     @Override

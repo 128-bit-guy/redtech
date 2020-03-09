@@ -54,7 +54,7 @@ public class RedAlloyWirePart extends WirePartBase {
 
     @Override
     public PartModelKey getModelKey() {
-        return new WireModelKey(this.direction, WireShapeGen.mapToSet(connected));
+        return new WireModelKey(this.direction, WireShapeGen.mapToSet(connected), power);
     }
 
     @Override

@@ -47,8 +47,7 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
     private final VoxelShape[] notConnectedShapes;
     protected int ticksExisted = 0;
     protected boolean connectibleUpdateScheduled = false;
-    protected boolean connectionUpdateScheduled = false;
-    protected boolean connectionUpdateNNTScheduled = false;
+    protected boolean connectionSendScheduled = false;
 
     public WirePartBase(PartDefinition definition, MultipartHolder holder, CompoundTag nbt, Map<Direction, Map<Direction, VoxelShape>> connectionShapes, VoxelShape[] centerShapes, VoxelShape[] notConnectedShapes) {
         super(definition, holder);
@@ -158,15 +157,11 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
         if (holder.getContainer().getMultipartWorld().isClient()) {
             return;
         }
-        if (connectionUpdateScheduled) {
-            refreshConnected();
-            connectionUpdateScheduled = false;
+        if (connectionSendScheduled) {
+            sendUpdateConnections();
+            connectionSendScheduled = false;
         }
-        if (connectionUpdateNNTScheduled) {
-            connectionUpdateNNTScheduled = false;
-            connectionUpdateScheduled = true;
-        }
-        if (ticksExisted == 1 || connectibleUpdateScheduled) {
+        if(ticksExisted == 0 || connectibleUpdateScheduled) {
             refreshConnectible();
             connectibleUpdateScheduled = false;
         }
@@ -177,7 +172,7 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
         if(!canExist()) {
             holder.remove();
         }
-        connectionUpdateNNTScheduled = true;
+        refreshConnected();
     }
 
     private void onPartAdded(PartAddedEvent event) {
@@ -193,15 +188,22 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
             return;
         }
         VoxelShape shape = holder.getContainer().getCurrentShape();
+        boolean x = false;
         for (Direction direction : Direction.values()) {
             if (direction.getAxis() == this.direction.getAxis()) {
                 continue;
             }
             VoxelShape shape1 = connectionShapes.get(this.direction).get(direction);
-            boolean b = VoxelShapes.matchesAnywhere(shape, shape1, BooleanBiFunction.AND);
-            canConnect.put(direction, !b);
+            boolean b = !VoxelShapes.matchesAnywhere(shape, shape1, BooleanBiFunction.AND);
+            x |= b != canConnect.get(direction);
+            canConnect.put(direction, b);
         }
-        connectionUpdateScheduled = true;
+        refreshConnected();
+        if(x) {
+            BlockPos pos = holder.getContainer().getMultipartPos();
+            World w = holder.getContainer().getMultipartWorld();
+            w.updateNeighbors(pos, w.getBlockState(pos).getBlock());
+        }
     }
 
     private void refreshConnected() {
@@ -239,10 +241,14 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
         if (added || removed) {
             onConnectionsModified(removed);
         }
+        connectionSendScheduled = true;
+        holder.getContainer().recalculateShape();
+    }
+
+    private void sendUpdateConnections() {
         PlayerStream
                 .watching(holder.getContainer().getMultipartBlockEntity())
                 .forEach(p -> UPDATE_CONNECTIONS.send(CoreMinecraftNetUtil.getConnection(p), this));
-        holder.getContainer().recalculateShape();
     }
 
     public abstract Optional<WSElement> getConnectedElement(WirePointer ptr);

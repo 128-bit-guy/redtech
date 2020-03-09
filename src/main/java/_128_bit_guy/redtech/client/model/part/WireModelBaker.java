@@ -24,6 +24,9 @@ public class WireModelBaker implements PartModelBaker<WireModelKey> {
                 if (q.nominalFace() == dir) {
                     q.cullFace(q.nominalFace());
                 }
+                int allColor = key.power;
+                allColor |= 0xFF000000;
+                q.spriteColor(0, allColor, allColor, allColor, allColor);
                 return true;
             });
         }
