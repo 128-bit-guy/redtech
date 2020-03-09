@@ -114,7 +114,8 @@ public class RedAlloyWirePart extends WirePartBase {
                 EnumMap<Direction, WSElement> result = new EnumMap<>(Direction.class);
                 for(Direction direction : Direction.values()) {
                     if(connected.get(direction)) {
-                        result.put(direction, getConnectedWire(direction).get());
+                        Optional<WSElement> element = getConnectedWire(direction);
+                        element.ifPresent(wsElement -> result.put(direction, wsElement));
                     }
                 }
                 return result;
