@@ -25,6 +25,9 @@ public class RedAlloyWireItem extends Item {
         Direction direction = itemUsageContext_1.getSide();
         BlockPos pos = itemUsageContext_1.getBlockPos().offset(direction);
         World world = itemUsageContext_1.getWorld();
+        if(!RedAlloyWirePart.canExist(world, pos, direction.getOpposite())) {
+            return ActionResult.FAIL;
+        }
         MultipartContainer.PartOffer offer = MultipartUtil.offerNewPart(world, pos, h -> new RedAlloyWirePart(ModParts.WIRE, h, direction.getOpposite()));
         if(offer != null) {
             offer.apply();

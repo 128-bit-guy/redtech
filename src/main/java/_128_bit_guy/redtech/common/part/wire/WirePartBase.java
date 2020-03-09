@@ -15,6 +15,8 @@ import alexiil.mc.lib.multipart.api.event.PartTickEvent;
 import alexiil.mc.lib.net.*;
 import alexiil.mc.lib.net.impl.CoreMinecraftNetUtil;
 import net.fabricmc.fabric.api.server.PlayerStream;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;
@@ -97,6 +99,18 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
         }
     }
 
+    private boolean canExist() {
+        World world = holder.getContainer().getMultipartWorld();
+        BlockPos pos = holder.getContainer().getMultipartPos();
+        return canExist(world, pos, direction);
+    }
+
+    public static boolean canExist(World world, BlockPos pos, Direction direction) {
+        BlockPos pos2 = pos.offset(direction);
+        BlockState bs = world.getBlockState(pos2);
+        return bs.isSideSolidFullSquare(world, pos2, direction.getOpposite()) || bs.getBlock() == Blocks.HOPPER;
+    }
+
     @Override
     public CompoundTag toTag() {
         CompoundTag tag = super.toTag();
@@ -159,7 +173,10 @@ public abstract class WirePartBase extends AbstractPart implements WSElementProv
         ++ticksExisted;
     }
 
-    private void onNeighbourUpdate(NeighbourUpdateEvent event) {
+    protected void onNeighbourUpdate(NeighbourUpdateEvent event) {
+        if(!canExist()) {
+            holder.remove();
+        }
         connectionUpdateNNTScheduled = true;
     }
 

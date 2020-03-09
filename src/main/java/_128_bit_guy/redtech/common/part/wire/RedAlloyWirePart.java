@@ -7,6 +7,7 @@ import _128_bit_guy.redtech.common.init.ModItems;
 import _128_bit_guy.redtech.common.part.key.WireModelKey;
 import alexiil.mc.lib.multipart.api.MultipartHolder;
 import alexiil.mc.lib.multipart.api.PartDefinition;
+import alexiil.mc.lib.multipart.api.event.NeighbourUpdateEvent;
 import alexiil.mc.lib.multipart.api.render.PartModelKey;
 import alexiil.mc.lib.net.*;
 import net.minecraft.entity.player.PlayerEntity;
@@ -95,6 +96,12 @@ public class RedAlloyWirePart extends WirePartBase {
         });
     }
 
+    @Override
+    protected void onNeighbourUpdate(NeighbourUpdateEvent event) {
+        super.onNeighbourUpdate(event);
+        power = (holder.getContainer().getMultipartWorld().getReceivedRedstonePower(holder.getContainer().getMultipartPos()) * 17);
+    }
+
     private WirePointer getPtr() {
         return new WirePointer(holder.getContainer().getMultipartWorld(), holder.getContainer().getMultipartPos(), direction, null);
     }
@@ -142,7 +149,7 @@ public class RedAlloyWirePart extends WirePartBase {
         if(player.getStackInHand(hand).getItem() != ModItems.MULTIMETER) {
             return ActionResult.FAIL;
         }
-        player.sendMessage(new LiteralText("Power: "));
+        player.sendMessage(new LiteralText("Power: " + power));
         return ActionResult.SUCCESS;
     }
 
