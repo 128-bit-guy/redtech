@@ -8,13 +8,17 @@ import alexiil.mc.lib.multipart.api.MultipartUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.DyeColor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 public class RedAlloyWireItem extends Item {
-    public RedAlloyWireItem() {
+    public final DyeColor color;
+
+    public RedAlloyWireItem(DyeColor color) {
         super(new Settings().group(ModTabs.WIRING));
+        this.color = color;
     }
 
     @Override
@@ -28,7 +32,7 @@ public class RedAlloyWireItem extends Item {
         if(!RedAlloyWirePart.canExist(world, pos, direction.getOpposite())) {
             return ActionResult.FAIL;
         }
-        MultipartContainer.PartOffer offer = MultipartUtil.offerNewPart(world, pos, h -> new RedAlloyWirePart(ModParts.WIRE, h, direction.getOpposite()));
+        MultipartContainer.PartOffer offer = MultipartUtil.offerNewPart(world, pos, h -> new RedAlloyWirePart(ModParts.WIRE, h, direction.getOpposite(), color));
         if(offer != null) {
             offer.apply();
             offer.getHolder().getPart().onPlacedBy(itemUsageContext_1.getPlayer(), itemUsageContext_1.getHand());

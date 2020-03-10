@@ -7,11 +7,13 @@ import _128_bit_guy.redtech.common.attribute.wire.WSElementType;
 import _128_bit_guy.redtech.common.init.ModItems;
 import _128_bit_guy.redtech.common.part.DynamicRedstonePart;
 import _128_bit_guy.redtech.common.part.key.WireModelKey;
+import _128_bit_guy.redtech.common.util.SerializationUtils;
 import alexiil.mc.lib.multipart.api.MultipartHolder;
 import alexiil.mc.lib.multipart.api.PartDefinition;
 import alexiil.mc.lib.multipart.api.event.PartTickEvent;
 import alexiil.mc.lib.multipart.api.render.PartModelKey;
 import alexiil.mc.lib.net.*;
+import net.fabricmc.api.ModInitializer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
@@ -43,6 +45,7 @@ public class RedAlloyWirePart extends WirePartBase implements DynamicRedstonePar
     private int power;
     private boolean powerSendScheduled = false;
     private static boolean wiresEmitRedstonePower = true;
+    private final DyeColor color;
 
     static {
         WireShapeGen.createWireShapes(WIRE_WIDTH, WIRE_HEIGHT, CENTER_SHAPES, CONNECTION_SHAPES, NOT_CONNECTED_SHAPES);
@@ -51,15 +54,18 @@ public class RedAlloyWirePart extends WirePartBase implements DynamicRedstonePar
     public RedAlloyWirePart(PartDefinition definition, MultipartHolder holder, CompoundTag nbt) {
         super(definition, holder, nbt, CONNECTION_SHAPES, CENTER_SHAPES, NOT_CONNECTED_SHAPES);
         power = nbt.getInt("strength");
+        color = SerializationUtils.intToEnum(nbt.getInt("color"), DyeColor.class);
     }
 
     public RedAlloyWirePart(PartDefinition definition, MultipartHolder holder, NetByteBuf buffer, IMsgReadCtx ctx) throws InvalidInputDataException {
         super(definition, holder, buffer, ctx, CONNECTION_SHAPES, CENTER_SHAPES, NOT_CONNECTED_SHAPES);
         receiveUpdatePower(buffer, ctx);
+        color = SerializationUtils.intToEnum(buffer.readVarInt(), DyeColor.class);
     }
 
-    public RedAlloyWirePart(PartDefinition definition, MultipartHolder holder, Direction direction) {
+    public RedAlloyWirePart(PartDefinition definition, MultipartHolder holder, Direction direction, DyeColor color) {
         super(definition, holder, direction, CONNECTION_SHAPES, CENTER_SHAPES, NOT_CONNECTED_SHAPES);
+        this.color = color;
     }
 
     public static VoxelShape getWireShape(Direction mainDirection, Set<Direction> connections) {
@@ -75,16 +81,23 @@ public class RedAlloyWirePart extends WirePartBase implements DynamicRedstonePar
     public void writeCreationData(NetByteBuf buffer, IMsgWriteCtx ctx) {
         super.writeCreationData(buffer, ctx);
         sendUpdatePower(buffer, ctx);
+        buffer.writeVarInt(SerializationUtils.enumToInt(color));
     }
 
     @Override
     public ItemStack getPickStack() {
-        return new ItemStack(ModItems.WIRE);
+        if(color != null) {
+            return new ItemStack(ModItems.COLORED_RED_ALLOY_WIRES.get(color));
+        }
+        return new ItemStack(ModItems.RED_ALLOY_WIRE);
     }
 
     @Override
     public Optional<WSElement> get(Direction mainDirection, Direction searchDirection, WSElementType type, DyeColor color) {
         if (mainDirection != direction) {
+            return Optional.empty();
+        }
+        if((color != null) && (this.color != null) && (this.color != color)) {
             return Optional.empty();
         }
         if (searchDirection != null && !canConnect.get(searchDirection.getOpposite())) {
@@ -142,6 +155,9 @@ public class RedAlloyWirePart extends WirePartBase implements DynamicRedstonePar
     }
 
     private int getIncomingPower() {
+        if(color != null) {
+            return 0;
+        }
         boolean lastWiresEmitRedstonePower = wiresEmitRedstonePower;
         wiresEmitRedstonePower = false;
         int result = (holder.getContainer().getMultipartWorld().getReceivedRedstonePower(holder.getContainer().getMultipartPos()) * 17);
@@ -180,16 +196,12 @@ public class RedAlloyWirePart extends WirePartBase implements DynamicRedstonePar
 
     @Override
     public Optional<WSElement> getConnectedElement(WirePointer ptr) {
-        return WSElementProvider.getFromPtr(ptr, WSElementType.REDSTONE, null);
+        return WSElementProvider.getFromPtr(ptr, WSElementType.REDSTONE, color);
     }
 
     @Override
     public void onConnectionsModified(boolean removed) {
         RAWSElement el = (RAWSElement)get(direction, null, WSElementType.REDSTONE, null).get();
-//        HashSet<WirePointer> fillStartPoints = new HashSet<>();
-//        if(removed) {
-//            zeroingDfs(el, new HashSet<>(), fillStartPoints);
-//        }
         WirePowerPropagator.propagate(el, removed);
     }
 
@@ -209,6 +221,7 @@ public class RedAlloyWirePart extends WirePartBase implements DynamicRedstonePar
     public CompoundTag toTag() {
         CompoundTag tag = super.toTag();
         tag.putInt("strength", power);
+        tag.putInt("color", SerializationUtils.enumToInt(color));
         return tag;
     }
 
@@ -236,6 +249,9 @@ public class RedAlloyWirePart extends WirePartBase implements DynamicRedstonePar
 
     @Override
     public int getStrongRedstonePower(Direction facing) {
+        if(color != null) {
+            return 0;
+        }
         if((facing.getAxis() == this.direction.getAxis()) || (!wiresEmitRedstonePower)) {
             return 0;
         }
@@ -244,6 +260,9 @@ public class RedAlloyWirePart extends WirePartBase implements DynamicRedstonePar
 
     @Override
     public int getWeakRedstonePower(Direction facing) {
+        if(color != null) {
+            return 0;
+        }
         if((facing != this.direction) || (!wiresEmitRedstonePower)) {
             return 0;
         }

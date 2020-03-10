@@ -22,7 +22,7 @@ public class ModTabs {
                 .build();
         WIRING = FabricItemGroupBuilder
                 .create(new Identifier(RedTech.ID, "wiring"))
-                .icon(() -> new ItemStack(ModItems.WIRE))
+                .icon(() -> new ItemStack(ModItems.RED_ALLOY_WIRE))
                 .build();
         MISC = FabricItemGroupBuilder
                 .create(new Identifier(RedTech.ID, "misc"))

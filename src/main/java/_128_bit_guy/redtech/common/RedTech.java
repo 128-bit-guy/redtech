@@ -15,6 +15,6 @@ public class RedTech implements ModInitializer {
         ModParts.init();
         ModItems.init();
         ModRecipeSerializers.init();
-        ServerTickCallback.EVENT.register(new NetworkManager());
+//        ServerTickCallback.EVENT.register(new NetworkManager());
     }
 }

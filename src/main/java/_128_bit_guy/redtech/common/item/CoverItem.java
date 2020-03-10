@@ -1,12 +1,8 @@
 package _128_bit_guy.redtech.common.item;
 
-import _128_bit_guy.redtech.client.render.preview.CoverPreviewRenderer;
-import _128_bit_guy.redtech.client.render.preview.ItemPreviewRenderer;
 import _128_bit_guy.redtech.common.RedTech;
 import _128_bit_guy.redtech.common.init.ModItems;
 import _128_bit_guy.redtech.common.init.ModParts;
-import _128_bit_guy.redtech.common.item.preview.CoverPreviewKey;
-import _128_bit_guy.redtech.common.item.preview.PreviewRendererProvider;
 import _128_bit_guy.redtech.common.part.CoverPart;
 import _128_bit_guy.redtech.common.util.VecMath;
 import alexiil.mc.lib.multipart.api.MultipartContainer;
@@ -31,7 +27,7 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
-public class CoverItem extends Item implements PreviewRendererProvider<CoverPreviewKey> {
+public class CoverItem extends Item {
     public CoverItem() {
         super(new Settings());
     }
@@ -104,33 +100,33 @@ public class CoverItem extends Item implements PreviewRendererProvider<CoverPrev
         );
     }
 
-    @Override
-    public CoverPreviewKey instantiateKey() {
-        return new CoverPreviewKey();
-    }
-
-    @Override
-    public CoverPreviewKey populateKeyData(CoverPreviewKey key, ItemUsageContext ctx) {
-        World world = ctx.getWorld();
-        BlockPos pos = ctx.getBlockPos();
-        Direction side = ctx.getSide();
-        ItemStack stack = ctx.getStack();
-        Vec3d hitPos = ctx.getHitPos();
-        int size = stack.getOrCreateTag().getInt("size");
-        BlockState state = NbtHelper.toBlockState(stack.getOrCreateTag().getCompound("state"));
-        Pair<BlockPos, Direction> p = getCoverDirection(world, pos, side, hitPos, size);
-        if(p == null) {
-            return null;
-        }
-        key.direction = p.getRight();
-        key.pos = p.getLeft();
-        key.size = size;
-        key.state = state;
-        return key;
-    }
-
-    @Override
-    public ItemPreviewRenderer<CoverPreviewKey> getRenderer() {
-        return CoverPreviewRenderer.INSTANCE;
-    }
+//    @Override
+//    public CoverPreviewKey instantiateKey() {
+//        return new CoverPreviewKey();
+//    }
+//
+//    @Override
+//    public CoverPreviewKey populateKeyData(CoverPreviewKey key, ItemUsageContext ctx) {
+//        World world = ctx.getWorld();
+//        BlockPos pos = ctx.getBlockPos();
+//        Direction side = ctx.getSide();
+//        ItemStack stack = ctx.getStack();
+//        Vec3d hitPos = ctx.getHitPos();
+//        int size = stack.getOrCreateTag().getInt("size");
+//        BlockState state = NbtHelper.toBlockState(stack.getOrCreateTag().getCompound("state"));
+//        Pair<BlockPos, Direction> p = getCoverDirection(world, pos, side, hitPos, size);
+//        if(p == null) {
+//            return null;
+//        }
+//        key.direction = p.getRight();
+//        key.pos = p.getLeft();
+//        key.size = size;
+//        key.state = state;
+//        return key;
+//    }
+//
+//    @Override
+//    public ItemPreviewRenderer<CoverPreviewKey> getRenderer() {
+//        return CoverPreviewRenderer.INSTANCE;
+//    }
 }
