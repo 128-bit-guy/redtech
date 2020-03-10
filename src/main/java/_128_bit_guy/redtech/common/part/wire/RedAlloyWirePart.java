@@ -5,6 +5,7 @@ import _128_bit_guy.redtech.common.attribute.wire.WSElement;
 import _128_bit_guy.redtech.common.attribute.wire.WSElementProvider;
 import _128_bit_guy.redtech.common.attribute.wire.WSElementType;
 import _128_bit_guy.redtech.common.init.ModItems;
+import _128_bit_guy.redtech.common.part.DynamicRedstonePart;
 import _128_bit_guy.redtech.common.part.key.WireModelKey;
 import alexiil.mc.lib.multipart.api.MultipartHolder;
 import alexiil.mc.lib.multipart.api.PartDefinition;
@@ -19,12 +20,14 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.World;
 
 import java.util.*;
 
-public class RedAlloyWirePart extends WirePartBase {
+public class RedAlloyWirePart extends WirePartBase implements DynamicRedstonePart {
     public static ParentNetIdSingle<RedAlloyWirePart> NET_ID = WirePartBase.NET_ID.subType(RedAlloyWirePart.class, RedTech.ID + ":red_alloy_wire");
     private static NetIdDataK<RedAlloyWirePart> UPDATE_POWER = NET_ID.idData("update_power");
 
@@ -39,6 +42,7 @@ public class RedAlloyWirePart extends WirePartBase {
     private static VoxelShape[] NOT_CONNECTED_SHAPES = new VoxelShape[6];
     private int power;
     private boolean powerSendScheduled = false;
+    private static boolean wiresEmitRedstonePower = true;
 
     static {
         WireShapeGen.createWireShapes(WIRE_WIDTH, WIRE_HEIGHT, CENTER_SHAPES, CONNECTION_SHAPES, NOT_CONNECTED_SHAPES);
@@ -98,7 +102,7 @@ public class RedAlloyWirePart extends WirePartBase {
 
             @Override
             public int getIncomingRedstonePower() {
-                return (holder.getContainer().getMultipartWorld().getReceivedRedstonePower(holder.getContainer().getMultipartPos()) * 17);
+                return getIncomingPower();
             }
 
             @Override
@@ -106,6 +110,7 @@ public class RedAlloyWirePart extends WirePartBase {
                 if(RedAlloyWirePart.this.power != strength) {
                     RedAlloyWirePart.this.power = strength;
                     powerSendScheduled = true;
+                    updateAllPowerReceivers();
                 }
             }
 
@@ -128,10 +133,40 @@ public class RedAlloyWirePart extends WirePartBase {
         });
     }
 
+    private void updateAllPowerReceivers() {
+        World world = holder.getContainer().getMultipartWorld();
+        BlockPos pos = holder.getContainer().getMultipartPos();
+        world.updateNeighbors(pos, world.getBlockState(pos).getBlock());
+        BlockPos pos2 = pos.offset(direction);
+        world.updateNeighbors(pos2, world.getBlockState(pos2).getBlock());
+    }
+
+    private int getIncomingPower() {
+        boolean lastWiresEmitRedstonePower = wiresEmitRedstonePower;
+        wiresEmitRedstonePower = false;
+        int result = (holder.getContainer().getMultipartWorld().getReceivedRedstonePower(holder.getContainer().getMultipartPos()) * 17);
+        wiresEmitRedstonePower = lastWiresEmitRedstonePower;
+        return result;
+    }
+
+
+
     @Override
     protected void updatePower() {
         int oldPower = power;
-        int newPower = (holder.getContainer().getMultipartWorld().getReceivedRedstonePower(holder.getContainer().getMultipartPos()) * 17);
+        int newPower = getIncomingPower();
+        for(Direction direction : Direction.values()) {
+            if(direction.getAxis() == this.direction.getAxis()) {
+                continue;
+            }
+            Optional<WSElement> newElement = getConnectedWire(direction);
+            if(newElement.isPresent()) {
+                newPower = Math.max(newPower, ((RAWSElement)newElement.get()).getPower() - 1);
+            }
+        }
+        if(newPower == oldPower) {
+            return;
+        }
         RAWSElement el = (RAWSElement)get(direction, null, WSElementType.REDSTONE, null).get();
         WirePowerPropagator.propagate(el, oldPower > newPower);
         if(oldPower != power) {
@@ -197,5 +232,21 @@ public class RedAlloyWirePart extends WirePartBase {
     private void sendUpdatePower(NetByteBuf buf, IMsgWriteCtx ctx) {
         ctx.assertServerSide();
         buf.writeVarInt(power);
+    }
+
+    @Override
+    public int getStrongRedstonePower(Direction facing) {
+        if((facing.getAxis() == this.direction.getAxis()) || (!wiresEmitRedstonePower)) {
+            return 0;
+        }
+        return power / 17;
+    }
+
+    @Override
+    public int getWeakRedstonePower(Direction facing) {
+        if((facing != this.direction) || (!wiresEmitRedstonePower)) {
+            return 0;
+        }
+        return power / 17;
     }
 }
