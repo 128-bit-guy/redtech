@@ -26,6 +26,7 @@ public class MultipartBlockMixin extends Block {
 
     /**
      * @author 128_bit_guy
+     * //TODO replace with callback injector
      */
     @Overwrite
     @Override
@@ -46,6 +47,7 @@ public class MultipartBlockMixin extends Block {
 
     /**
      * @author 128_bit_guy
+     * //TODO replace with callback injector
      */
     @Overwrite
     @Override
@@ -54,7 +56,7 @@ public class MultipartBlockMixin extends Block {
         if (be instanceof MultipartBlockEntity) {
             MultipartPropertyContainer properties = ((MultipartBlockEntity) be).getContainer().getProperties();
             int result = Math.max(
-                properties.getValue(MultipartProperties.getStrongRedstonePower(oppositeFace.getOpposite())), //
+                properties.getValue(MultipartProperties.getStrongRedstonePower(oppositeFace.getOpposite())),
                 properties.getValue(MultipartProperties.getWeakRedstonePower(oppositeFace.getOpposite()))
             );
             for(AbstractPart part : ((MultipartBlockEntity)be).getContainer().parts.stream().map(PartHolder::getPart).collect(Collectors.toList())) {

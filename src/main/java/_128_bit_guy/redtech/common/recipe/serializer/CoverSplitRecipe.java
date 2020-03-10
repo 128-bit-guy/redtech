@@ -2,16 +2,19 @@ package _128_bit_guy.redtech.common.recipe.serializer;
 
 import _128_bit_guy.redtech.common.init.ModItems;
 import _128_bit_guy.redtech.common.init.ModRecipeSerializers;
+import _128_bit_guy.redtech.common.item.AdvancedRecipeRemainderProvider;
 import _128_bit_guy.redtech.common.item.CoverItem;
 import _128_bit_guy.redtech.common.item.SawItem;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
+import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
 //import net.minecraft.util.TagHelper;
 import net.minecraft.world.World;
@@ -67,5 +70,24 @@ public class CoverSplitRecipe extends SpecialCraftingRecipe {
     @Override
     public RecipeSerializer<?> getSerializer() {
         return ModRecipeSerializers.COVER_CREATION;
+    }
+
+
+    @Override
+    public DefaultedList<ItemStack> getRemainingStacks(CraftingInventory inventory) {
+        DefaultedList<ItemStack> defaultedList_1 = DefaultedList.ofSize(inventory.getInvSize(), ItemStack.EMPTY);
+
+        for (int int_1 = 0; int_1 < defaultedList_1.size(); ++int_1) {
+            Item item_1 = inventory.getInvStack(int_1).getItem();
+            if (item_1.hasRecipeRemainder()) {
+                if (item_1 instanceof AdvancedRecipeRemainderProvider) {
+                    defaultedList_1.set(int_1, ((AdvancedRecipeRemainderProvider) item_1).getRecipeRemainderAdv(inventory.getInvStack(int_1)));
+                } else {
+                    defaultedList_1.set(int_1, new ItemStack(item_1.getRecipeRemainder()));
+                }
+            }
+        }
+
+        return defaultedList_1;
     }
 }
